@@ -10,9 +10,11 @@ prisma/dev.db
 prisma/dev.db-journal
 dev.db
 
-# Uploaded videos
+# Uploaded videos & media
 public/raw-uploads/
 public/videos/
+public/avatars/
+public/thumbnails/
 
 # Environment
 .env

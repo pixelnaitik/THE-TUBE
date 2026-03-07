@@ -3,6 +3,27 @@ import path from 'path';
 import fs from 'fs';
 import { prisma } from '@/lib/prisma';
 
+// Generate a thumbnail from video at the 1-second mark
+function generateThumbnail(rawFilePath: string, videoId: string): Promise<string | null> {
+  const thumbDir = path.join(process.cwd(), 'public', 'thumbnails');
+  if (!fs.existsSync(thumbDir)) fs.mkdirSync(thumbDir, { recursive: true });
+
+  const thumbFilename = `${videoId}.jpg`;
+  
+  return new Promise((resolve) => {
+    ffmpeg(rawFilePath)
+      .screenshots({
+        count: 1,
+        folder: thumbDir,
+        filename: thumbFilename,
+        timemarks: ['1'],
+        size: '640x360'
+      })
+      .on('end', () => resolve(`/thumbnails/${thumbFilename}`))
+      .on('error', () => resolve(null)); // Thumbnail failed? Continue without it
+  });
+}
+
 export async function processVideoToHLS(videoId: string, rawFilePath: string) {
   // First, try to copy raw file to public/videos as a fallback
   const publicVideoDir = path.join(process.cwd(), 'public', 'videos', videoId);
@@ -11,6 +32,12 @@ export async function processVideoToHLS(videoId: string, rawFilePath: string) {
   }
   const fallbackPath = path.join(publicVideoDir, 'video.mp4');
   fs.copyFileSync(rawFilePath, fallbackPath);
+
+  // Try to generate a thumbnail
+  const thumbnailUrl = await generateThumbnail(rawFilePath, videoId);
+  if (thumbnailUrl) {
+    await prisma.video.update({ where: { id: videoId }, data: { thumbnail: thumbnailUrl } });
+  }
 
   return new Promise<void>((resolve, reject) => {
     const outputDir = publicVideoDir;
@@ -38,7 +65,6 @@ export async function processVideoToHLS(videoId: string, rawFilePath: string) {
             where: { id: videoId },
             data: { status: 'READY', hlsUrl: relativeHlsUrl }
           });
-          // Clean up raw file
           try { fs.unlinkSync(rawFilePath); } catch {}
           resolve();
         } catch (dbError) {
@@ -50,7 +76,6 @@ export async function processVideoToHLS(videoId: string, rawFilePath: string) {
         console.error(`FFmpeg failed for video ${videoId}: ${err.message}`);
         console.log(`Falling back to raw MP4 for video ${videoId}`);
         
-        // Fallback: serve the raw MP4 directly instead of HLS
         try {
           await prisma.video.update({
             where: { id: videoId },
@@ -59,9 +84,8 @@ export async function processVideoToHLS(videoId: string, rawFilePath: string) {
               hlsUrl: `/videos/${videoId}/video.mp4`
             }
           });
-          // Clean up raw file (we already copied it)
           try { fs.unlinkSync(rawFilePath); } catch {}
-          resolve(); // Resolve instead of reject — video is still playable
+          resolve();
         } catch (dbError) {
           console.error('Fallback DB update also failed:', dbError);
           await prisma.video.update({
