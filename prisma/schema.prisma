@@ -1,0 +1,35 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  image     String?
+  videos    Video[]
+  createdAt DateTime @default(now())
+}
+
+model Video {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  thumbnail   String?
+  hlsUrl      String?  // URL to the master .m3u8 file
+  status      String   @default("PROCESSING") // PROCESSING, READY, FAILED
+  duration    Int?     // Duration in seconds
+  views       Int      @default(0)
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  createdAt   DateTime @default(now())
+}
