@@ -1,71 +1,77 @@
 "use client";
 
-import React from 'react';
-import { Menu, Search, Mic, Bell, User, Video, PlusSquare, LogOut } from 'lucide-react';
-import Link from 'next/link';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession, signOut } from "next-auth/react";
+import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Bell, Menu, Mic, Plus, Search, Video, UserCircle2 } from "lucide-react";
 
 export default function Navbar() {
   const { data: session } = useSession();
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 h-16 bg-[#0f0f0f] flex items-center justify-between px-4 z-50 text-white">
-      {/* Left section: Menu & Logo */}
+    <nav className="fixed top-0 left-0 right-0 bg-[#0f0f0f] z-50 flex items-center justify-between px-4 h-14 border-b border-[#222]">
+      {/* Left */}
       <div className="flex items-center gap-4">
         <button className="p-2 hover:bg-[#272727] rounded-full transition-colors">
-          <Menu className="w-6 h-6" />
+          <Menu className="w-5 h-5 text-white" />
         </button>
         <Link href="/" className="flex items-center gap-1">
           <div className="bg-red-600 text-white p-1 rounded-lg">
             <Video className="w-5 h-5 fill-current" />
           </div>
-          <span className="text-xl font-semibold tracking-tighter">MyTube</span>
+          <span className="text-xl font-bold tracking-tighter text-white">MyTube</span>
         </Link>
       </div>
 
-      {/* Middle section: Search */}
-      <div className="flex items-center flex-1 max-w-2xl px-8">
-        <div className="flex w-full items-center">
-          <div className="flex w-full bg-[#121212] border border-[#303030] rounded-l-full overflow-hidden px-4 items-center focus-within:border-blue-500 ml-8">
-            <Search className="w-4 h-4 text-gray-400 hidden sm:block mr-2" />
-            <input 
-              type="text" 
-              placeholder="Search" 
-              className="w-full bg-transparent outline-none py-2 text-white placeholder-gray-400"
-            />
-          </div>
-          <button className="bg-[#222222] border border-l-0 border-[#303030] rounded-r-full px-5 py-2 hover:bg-[#303030] transition-colors">
-            <Search className="w-5 h-5 text-gray-200" />
+      {/* Center — Search */}
+      <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-[540px] mx-4">
+        <div className="flex w-full">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search"
+            className="w-full bg-[#121212] border border-[#303030] rounded-l-full px-4 py-2 text-white outline-none focus:border-blue-500 placeholder:text-gray-500 transition-colors"
+          />
+          <button type="submit" className="px-5 bg-[#222] border border-l-0 border-[#303030] rounded-r-full hover:bg-[#303030] transition-colors">
+            <Search className="w-5 h-5 text-white" />
           </button>
         </div>
-        <button className="ml-4 p-3 bg-[#181818] hover:bg-[#303030] rounded-full transition-colors">
-          <Mic className="w-5 h-5" />
+        <button type="button" className="ml-3 p-2.5 bg-[#222] rounded-full hover:bg-[#303030] transition-colors">
+          <Mic className="w-5 h-5 text-white" />
         </button>
-      </div>
+      </form>
 
-      {/* Right section: Icons */}
-      <div className="flex items-center gap-3">
-        <button className="p-2 hover:bg-[#272727] rounded-full sm:hidden">
-          <Search className="w-6 h-6" />
-        </button>
+      {/* Right */}
+      <div className="flex items-center gap-1">
         {session ? (
           <>
-            <Link href="/upload" className="flex items-center gap-2 p-2 hover:bg-[#272727] rounded-full transition-colors text-gray-200">
-              <PlusSquare className="w-6 h-6" />
-              <span className="hidden md:inline text-sm font-medium mr-2">Create</span>
+            <Link href="/upload" className="flex items-center gap-1.5 px-3 py-1.5 bg-[#222] hover:bg-[#303030] rounded-full text-white text-sm font-medium transition-colors mr-1">
+              <Plus className="w-4 h-4" /> Create
             </Link>
-            <button className="p-2 hover:bg-[#272727] rounded-full">
-              <Bell className="w-6 h-6" />
+            <button className="p-2 hover:bg-[#272727] rounded-full transition-colors">
+              <Bell className="w-5 h-5 text-white" />
             </button>
-            <button onClick={() => signOut()} className="flex items-center gap-2 p-2 pr-4 bg-[#222] hover:bg-[#303030] border border-[#303030] rounded-full transition-colors">
-              <LogOut className="w-5 h-5 text-red-500" />
-              <span className="text-sm font-medium">Sign Out</span>
+            <button
+              onClick={() => signOut()}
+              className="ml-1 w-8 h-8 rounded-full bg-purple-600 text-white text-sm font-medium flex items-center justify-center hover:ring-2 hover:ring-purple-400 transition-all"
+            >
+              {session.user?.name?.charAt(0)?.toUpperCase() || session.user?.email?.charAt(0)?.toUpperCase() || '?'}
             </button>
           </>
         ) : (
-          <Link href="/login" className="flex items-center gap-2 border border-[#3ea6ff] text-[#3ea6ff] px-4 py-1.5 rounded-full hover:bg-[#263850] transition-colors">
-            <User className="w-5 h-5" />
-            <span className="text-sm font-medium">Sign in</span>
+          <Link href="/login" className="flex items-center gap-1.5 text-blue-400 border border-blue-400/40 hover:bg-blue-400/10 rounded-full px-3 py-1.5 text-sm font-medium transition-colors">
+            <UserCircle2 className="w-5 h-5" /> Sign in
           </Link>
         )}
       </div>

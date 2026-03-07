@@ -11,25 +11,50 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
+  id        String    @id @default(cuid())
+  email     String    @unique
   password  String
   name      String?
-  image     String?
+  image     String?   // Avatar image path
   videos    Video[]
-  createdAt DateTime @default(now())
+  comments  Comment[]
+  likes     Like[]
+  createdAt DateTime  @default(now())
 }
 
 model Video {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   title       String
   description String?
   thumbnail   String?
-  hlsUrl      String?  // URL to the master .m3u8 file
-  status      String   @default("PROCESSING") // PROCESSING, READY, FAILED
-  duration    Int?     // Duration in seconds
-  views       Int      @default(0)
+  hlsUrl      String?   // URL to the master .m3u8 file or MP4 fallback
+  status      String    @default("PROCESSING") // PROCESSING, READY, FAILED
+  duration    Int?      // Duration in seconds
+  views       Int       @default(0)
   authorId    String
-  author      User     @relation(fields: [authorId], references: [id])
-  createdAt   DateTime @default(now())
+  author      User      @relation(fields: [authorId], references: [id])
+  comments    Comment[]
+  likes       Like[]
+  createdAt   DateTime  @default(now())
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  text      String
+  videoId   String
+  video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Like {
+  id      String @id @default(cuid())
+  type    String // "LIKE" or "DISLIKE"
+  videoId String
+  video   Video  @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User   @relation(fields: [userId], references: [id])
+
+  @@unique([videoId, userId]) // One reaction per user per video
 }
