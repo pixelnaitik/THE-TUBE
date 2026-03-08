@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,50 +8,92 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(cuid())
-  email     String    @unique
-  password  String
-  name      String?
-  image     String?   // Avatar image path
-  videos    Video[]
-  comments  Comment[]
-  likes     Like[]
-  createdAt DateTime  @default(now())
+  id            String         @id @default(cuid())
+  email         String         @unique
+  password      String
+  name          String?
+  image         String?
+  videos        Video[]
+  comments      Comment[]
+  likes         Like[]
+  history       WatchHistory[]
+  notifications Notification[]
+  subscribers   Subscription[] @relation("SubscribedTo")
+  subscribedTo  Subscription[] @relation("Subscriber")
+  createdAt     DateTime       @default(now())
 }
 
 model Video {
-  id          String    @id @default(cuid())
+  id          String         @id @default(cuid())
   title       String
   description String?
   thumbnail   String?
-  hlsUrl      String?   // URL to the master .m3u8 file or MP4 fallback
-  status      String    @default("PROCESSING") // PROCESSING, READY, FAILED
-  duration    Int?      // Duration in seconds
-  views       Int       @default(0)
+  hlsUrl      String?
+  status      String         @default("PROCESSING")
+  duration    Int?
+  views       Int            @default(0)
+  tags        String?        // Comma-separated tags
   authorId    String
-  author      User      @relation(fields: [authorId], references: [id])
+  author      User           @relation(fields: [authorId], references: [id])
   comments    Comment[]
   likes       Like[]
-  createdAt   DateTime  @default(now())
+  history     WatchHistory[]
+  createdAt   DateTime       @default(now())
 }
 
 model Comment {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   text      String
   videoId   String
-  video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  video     Video     @relation(fields: [videoId], references: [id], onDelete: Cascade)
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  createdAt DateTime @default(now())
+  user      User      @relation(fields: [userId], references: [id])
+  parentId  String?
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("CommentReplies")
+  createdAt DateTime  @default(now())
 }
 
 model Like {
   id      String @id @default(cuid())
-  type    String // "LIKE" or "DISLIKE"
+  type    String
   videoId String
   video   Video  @relation(fields: [videoId], references: [id], onDelete: Cascade)
   userId  String
   user    User   @relation(fields: [userId], references: [id])
 
-  @@unique([videoId, userId]) // One reaction per user per video
+  @@unique([videoId, userId])
+}
+
+model Subscription {
+  id           String   @id @default(cuid())
+  subscriberId String
+  subscriber   User     @relation("Subscriber", fields: [subscriberId], references: [id])
+  channelId    String
+  channel      User     @relation("SubscribedTo", fields: [channelId], references: [id])
+  createdAt    DateTime @default(now())
+
+  @@unique([subscriberId, channelId])
+}
+
+model WatchHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  videoId   String
+  video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  watchedAt DateTime @default(now())
+
+  @@unique([userId, videoId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String   // NEW_VIDEO, NEW_SUBSCRIBER, NEW_COMMENT
+  message   String
+  link      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
 }

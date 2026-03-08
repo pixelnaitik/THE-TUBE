@@ -9,65 +9,68 @@ import { processVideoToHLS } from '@/lib/videoProcessor';
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-
-    if (!session || !session.user) {
+    if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const formData = await req.formData();
-    const file = formData.get('file') as File | null;
+    const file = (formData.get('video') || formData.get('file')) as File | null;
     const title = formData.get('title') as string;
     const description = formData.get('description') as string;
+    const tags = formData.get('tags') as string;
 
     if (!file || !title) {
       return NextResponse.json({ error: "File and title are required" }, { status: 400 });
     }
 
-    // 1. Fetch author user by email
-    const user = await prisma.user.findUnique({ where: { email: session.user.email as string } });
+    const user = await prisma.user.findUnique({ where: { email: session.user.email } });
     if (!user) {
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // 2. Save video metadata to DB (state: PROCESSING)
+    // Create video record
     const newVideo = await prisma.video.create({
       data: {
         title,
-        description,
+        description: description || null,
+        tags: tags || null,
         status: 'PROCESSING',
         authorId: user.id,
-        thumbnail: `https://picsum.photos/seed/${Math.random()}/800/450` // Mock thumbnail for now
       }
     });
 
-    // 2. Setup raw upload directory
+    // Save raw file to disk
     const rawUploadsDir = path.join(process.cwd(), 'public', 'raw-uploads');
-    if (!fs.existsSync(rawUploadsDir)) {
-      fs.mkdirSync(rawUploadsDir, { recursive: true });
-    }
+    if (!fs.existsSync(rawUploadsDir)) fs.mkdirSync(rawUploadsDir, { recursive: true });
 
-    // 3. Write raw file to disk
     const rawFilePath = path.join(rawUploadsDir, `${newVideo.id}.mp4`);
-    
-    // Read the file as an array buffer and write it
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    const buffer = Buffer.from(await file.arrayBuffer());
     fs.writeFileSync(rawFilePath, buffer);
 
-    // 4. Trigger FFmpeg Processing Asynchronously
-    // We intentionally don't await this so the API responds quickly to the client
-    processVideoToHLS(newVideo.id, rawFilePath)
-      .then(() => {
-        // Optionally clean up the raw file to save space
-         fs.unlinkSync(rawFilePath);
-      })
-      .catch((err) => {
-         console.error("FFmpeg background job failed:", err);
-      });
+    // Trigger FFmpeg processing asynchronously
+    processVideoToHLS(newVideo.id, rawFilePath).catch((err) => {
+      console.error("FFmpeg background job failed:", err);
+    });
 
-    return NextResponse.json({ 
-        message: 'Upload successful, processing started', 
-        videoId: newVideo.id 
+    // Notify subscribers
+    const subscribers = await prisma.subscription.findMany({
+      where: { channelId: user.id }
+    });
+
+    if (subscribers.length > 0) {
+      await prisma.notification.createMany({
+        data: subscribers.map(sub => ({
+          userId: sub.subscriberId,
+          type: 'NEW_VIDEO',
+          message: `${user.name || 'A channel you follow'} uploaded: ${title}`,
+          link: `/watch/${newVideo.id}`
+        }))
+      });
+    }
+
+    return NextResponse.json({
+      message: 'Upload successful, processing started',
+      videoId: newVideo.id
     }, { status: 200 });
 
   } catch (error) {

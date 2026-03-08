@@ -31,7 +31,7 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
   const [qualities, setQualities] = useState<QualityLevel[]>([]);
   const [currentQuality, setCurrentQuality] = useState(-1); // -1 = Auto
   const [autoLabel, setAutoLabel] = useState('Auto');
-  const controlTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const controlTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // Initialize HLS or native video
   useEffect(() => {
@@ -145,6 +145,35 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
     controlTimeoutRef.current = setTimeout(() => {
       if (videoRef.current && !videoRef.current.paused) setShowControls(false);
     }, 3000);
+  }, []);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      const video = videoRef.current;
+      if (!video) return;
+      // Ignore if user is typing in an input
+      if ((e.target as HTMLElement).tagName === 'INPUT' || (e.target as HTMLElement).tagName === 'TEXTAREA') return;
+
+      switch (e.key.toLowerCase()) {
+        case ' ':
+        case 'k': e.preventDefault(); togglePlay(); break;
+        case 'f': e.preventDefault(); toggleFullscreen(); break;
+        case 'm': e.preventDefault(); toggleMute(); break;
+        case 'arrowleft': e.preventDefault(); video.currentTime -= 5; showControlsTemporarily(); break;
+        case 'arrowright': e.preventDefault(); video.currentTime += 5; showControlsTemporarily(); break;
+        case 'arrowup': e.preventDefault(); video.volume = Math.min(1, video.volume + 0.1); setVolume(video.volume); break;
+        case 'arrowdown': e.preventDefault(); video.volume = Math.max(0, video.volume - 0.1); setVolume(video.volume); break;
+        case '>': video.playbackRate = Math.min(2, video.playbackRate + 0.25); setPlaybackRate(video.playbackRate); break;
+        case '<': video.playbackRate = Math.max(0.25, video.playbackRate - 0.25); setPlaybackRate(video.playbackRate); break;
+        case 'p': e.preventDefault();
+          if (document.pictureInPictureElement) document.exitPictureInPicture();
+          else video.requestPictureInPicture().catch(() => {});
+          break;
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
   }, []);
 
   // Video event listeners

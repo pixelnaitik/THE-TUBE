@@ -1,51 +1,41 @@
-import React from 'react';
-import { Home, Compass, PlaySquare, Clock, ThumbsUp, History, ListVideo } from 'lucide-react';
+"use client";
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Home, Flame, Users, Clock, Video, ThumbsUp, PlaySquare } from 'lucide-react';
 
-const sidebarItems = [
-  { icon: Home, label: 'Home', active: true },
-  { icon: Compass, label: 'Shorts' },
-  { icon: PlaySquare, label: 'Subscriptions' },
-];
-
-const secondaryItems = [
-  { icon: History, label: 'History' },
-  { icon: ListVideo, label: 'Your videos' },
-  { icon: Clock, label: 'Watch later' },
-  { icon: ThumbsUp, label: 'Liked videos' },
+const links = [
+  { href: '/', label: 'Home', icon: Home },
+  { href: '/subscriptions', label: 'Subscriptions', icon: Users },
+  { divider: true },
+  { href: '/history', label: 'History', icon: Clock },
+  { href: '/profile', label: 'Your videos', icon: Video },
+  { href: '/liked', label: 'Liked videos', icon: ThumbsUp },
 ];
 
 export default function Sidebar() {
+  const pathname = usePathname();
+
   return (
-    <aside className="w-64 fixed left-0 top-16 bottom-0 bg-[#0f0f0f] overflow-y-auto hidden md:block pt-4 pb-4 px-3 text-white">
-      <div className="flex flex-col gap-1 pb-4 border-b border-[#303030]">
-        {sidebarItems.map((item) => (
+    <aside className="fixed left-0 top-14 w-56 h-[calc(100vh-56px)] bg-[#0f0f0f] overflow-y-auto hide-scrollbar custom-scrollbar py-3 px-2">
+      {links.map((item, i) =>
+        'divider' in item ? (
+          <div key={i} className="border-t border-[#303030] my-2 mx-2"></div>
+        ) : (
           <Link
-            key={item.label}
-            href="#"
-            className={`flex items-center px-4 py-3 rounded-lg gap-5 transition-colors ${
-              item.active ? 'bg-[#272727]' : 'hover:bg-[#272727]'
+            key={item.href}
+            href={item.href!}
+            className={`flex items-center gap-4 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+              pathname === item.href
+                ? 'bg-[#272727] text-white font-medium'
+                : 'text-gray-300 hover:bg-[#1a1a1a]'
             }`}
           >
-            <item.icon className="w-6 h-6" />
-            <span className="text-sm font-medium">{item.label}</span>
+            <item.icon className="w-5 h-5" />
+            <span>{item.label}</span>
           </Link>
-        ))}
-      </div>
-
-      <div className="flex flex-col gap-1 py-4 border-b border-[#303030]">
-        <h3 className="px-4 text-sm font-semibold mb-2">You</h3>
-        {secondaryItems.map((item) => (
-          <Link
-            key={item.label}
-            href="#"
-            className="flex items-center px-4 py-3 rounded-lg gap-5 hover:bg-[#272727] transition-colors"
-          >
-            <item.icon className="w-6 h-6" />
-            <span className="text-sm font-medium">{item.label}</span>
-          </Link>
-        ))}
-      </div>
+        )
+      )}
     </aside>
   );
 }
