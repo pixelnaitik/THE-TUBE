@@ -1,0 +1,171 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  password      String
+  name          String?
+  image         String?
+  videos        Video[]
+  comments      Comment[]
+  likes         Like[]
+  history       WatchHistory[]
+  notifications Notification[]
+  watchLater    WatchLater[]
+  progress      VideoProgress[]
+  subscribers   Subscription[] @relation("SubscribedTo")
+  subscribedTo  Subscription[] @relation("Subscriber")
+  playlists     Playlist[]
+  createdAt     DateTime       @default(now())
+}
+
+model Video {
+  id           String          @id @default(cuid())
+  title        String
+  description  String?
+  thumbnail    String?
+  hlsUrl       String?
+  status       String          @default("PROCESSING")
+  scheduledFor DateTime?
+  duration     Int?
+  views        Int             @default(0)
+  tags         String?
+  authorId     String
+  author       User            @relation(fields: [authorId], references: [id])
+  comments     Comment[]
+  likes        Like[]
+  history      WatchHistory[]
+  playlists    PlaylistVideo[]
+  watchLater   WatchLater[]
+  progress     VideoProgress[]
+  createdAt    DateTime        @default(now())
+
+  @@index([authorId])
+  @@index([status, createdAt])
+  @@index([authorId, createdAt])
+  @@index([status, scheduledFor])
+}
+
+model Comment {
+  id        String    @id @default(cuid())
+  text      String
+  videoId   String
+  video     Video     @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  parentId  String?
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("CommentReplies")
+  createdAt DateTime  @default(now())
+
+  @@index([videoId])
+  @@index([userId])
+  @@index([parentId])
+}
+
+model Like {
+  id      String @id @default(cuid())
+  type    String
+  videoId String
+  video   Video  @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User   @relation(fields: [userId], references: [id])
+
+  @@unique([videoId, userId])
+  @@index([userId])
+}
+
+model Subscription {
+  id           String   @id @default(cuid())
+  subscriberId String
+  subscriber   User     @relation("Subscriber", fields: [subscriberId], references: [id])
+  channelId    String
+  channel      User     @relation("SubscribedTo", fields: [channelId], references: [id])
+  createdAt    DateTime @default(now())
+
+  @@unique([subscriberId, channelId])
+  @@index([channelId])
+}
+
+model WatchHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  videoId   String
+  video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  watchedAt DateTime @default(now())
+
+  @@unique([userId, videoId])
+  @@index([videoId])
+  @@index([userId, watchedAt])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String
+  message   String
+  link      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([userId, read, createdAt])
+}
+
+model Playlist {
+  id        String          @id @default(cuid())
+  name      String
+  userId    String
+  user      User            @relation(fields: [userId], references: [id])
+  videos    PlaylistVideo[]
+  createdAt DateTime        @default(now())
+}
+
+model PlaylistVideo {
+  id         String   @id @default(cuid())
+  playlistId String
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  videoId    String
+  video      Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  order      Int
+  addedAt    DateTime @default(now())
+
+  @@unique([playlistId, videoId])
+  @@index([videoId])
+}
+
+model WatchLater {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  videoId   String
+  video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, videoId])
+  @@index([videoId])
+  @@index([userId, createdAt])
+}
+
+model VideoProgress {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  videoId         String
+  video           Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  positionSeconds Int      @default(0)
+  durationSeconds Int      @default(0)
+  updatedAt       DateTime @updatedAt
+
+  @@unique([userId, videoId])
+  @@index([userId, updatedAt])
+}

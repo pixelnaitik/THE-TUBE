@@ -1,0 +1,189 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0b0f17;
+  --foreground: #f5f7fb;
+  --surface-1: #121826;
+  --surface-2: #1a2235;
+  --surface-3: #25314a;
+  --line: #2b3650;
+  --muted: #9aa7c2;
+  --accent: #3b82f6;
+  --accent-strong: #2563eb;
+  --accent-soft: rgba(59, 130, 246, 0.18);
+  --success-soft: rgba(16, 185, 129, 0.18);
+  --glass-bg: rgba(15, 23, 42, 0.56);
+  --glass-bg-strong: rgba(11, 15, 23, 0.82);
+  --glass-border: rgba(148, 163, 184, 0.25);
+  --glass-shadow: 0 12px 35px rgba(2, 6, 23, 0.35);
+}
+
+html.light {
+  --background: #edf3ff;
+  --foreground: #0f172a;
+  --surface-1: #f8fbff;
+  --surface-2: #e7efff;
+  --surface-3: #d4e3ff;
+  --line: #b8c9ea;
+  --muted: #475569;
+  --accent: #2563eb;
+  --accent-strong: #1d4ed8;
+  --accent-soft: rgba(37, 99, 235, 0.14);
+  --success-soft: rgba(16, 185, 129, 0.12);
+  --glass-bg: rgba(255, 255, 255, 0.58);
+  --glass-bg-strong: rgba(249, 252, 255, 0.9);
+  --glass-border: rgba(59, 130, 246, 0.22);
+  --glass-shadow: 0 14px 34px rgba(30, 64, 175, 0.12);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+}
+
+body {
+  background:
+    radial-gradient(1200px 450px at 20% -10%, rgba(59, 130, 246, 0.12), transparent 60%),
+    radial-gradient(900px 420px at 90% -20%, rgba(14, 165, 233, 0.1), transparent 58%),
+    var(--background);
+  color: var(--foreground);
+}
+
+html.light body {
+  background:
+    radial-gradient(900px 340px at 20% -15%, rgba(96, 165, 250, 0.2), transparent 60%),
+    radial-gradient(900px 360px at 90% -20%, rgba(14, 165, 233, 0.16), transparent 58%),
+    linear-gradient(180deg, #eef4ff 0%, #e8f0ff 100%);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.glass-panel,
+.surface-card {
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: var(--glass-shadow);
+}
+
+.glass-nav {
+  border-bottom: 1px solid var(--glass-border);
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+}
+
+.glass-sidebar {
+  border-right: 1px solid var(--glass-border);
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+}
+
+.glass-chip {
+  border: 1px solid var(--glass-border);
+  background: color-mix(in srgb, var(--surface-2) 70%, transparent);
+  color: var(--foreground);
+  backdrop-filter: blur(12px);
+}
+
+.glass-input {
+  border: 1px solid var(--glass-border);
+  background: color-mix(in srgb, var(--surface-1) 82%, transparent);
+  color: var(--foreground);
+  backdrop-filter: blur(12px);
+}
+
+.glass-pill {
+  border: 1px solid var(--glass-border);
+  background: color-mix(in srgb, var(--surface-2) 76%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+.text-muted {
+  color: var(--muted);
+}
+
+.page-title {
+  font-size: clamp(1.4rem, 2vw, 1.9rem);
+  line-height: 1.2;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.section-title {
+  font-size: clamp(1rem, 1.2vw, 1.2rem);
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.reveal-up {
+  animation: reveal-up 240ms ease-out both;
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #4f5d7a;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #7b88a3;
+}
+
+html.light .text-white {
+  color: #0f172a !important;
+}
+
+html.light .text-gray-200,
+html.light .text-gray-300,
+html.light .text-gray-400,
+html.light .text-gray-500 {
+  color: #475569 !important;
+}
+
+html.light .text-blue-200,
+html.light .text-blue-300 {
+  color: #1d4ed8 !important;
+}
+
+html.light .glass-pill {
+  color: var(--foreground);
+}
+

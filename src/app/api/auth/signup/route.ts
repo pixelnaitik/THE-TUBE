@@ -1,0 +1,37 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import bcrypt from 'bcryptjs';
+import { signupSchema } from '@/lib/validation';
+import { DEFAULT_AVATAR_DATA_URL } from '@/lib/avatar';
+
+export async function POST(req: NextRequest) {
+  try {
+    const parsed = signupSchema.safeParse(await req.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0]?.message || 'Invalid input' }, { status: 400 });
+    }
+    const { email, password, name } = parsed.data;
+
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      return NextResponse.json({ error: "An account with this email already exists" }, { status: 409 });
+    }
+
+    // Hash password and create user
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        name: name || email.split('@')[0],
+        image: DEFAULT_AVATAR_DATA_URL,
+      },
+    });
+
+    return NextResponse.json({ message: "Account created successfully", userId: user.id }, { status: 201 });
+  } catch (error) {
+    console.error("Signup Error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}
