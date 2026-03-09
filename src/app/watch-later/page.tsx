@@ -3,6 +3,7 @@ import { authOptions } from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import VideoCard from '@/components/VideoCard';
+import EmptyState from '@/components/EmptyState';
 import { Clock } from 'lucide-react';
 
 export default async function WatchLaterPage() {
@@ -22,11 +23,11 @@ export default async function WatchLaterPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-        <Clock className="w-6 h-6" /> Watch Later
+      <h1 className="page-title mb-5 flex items-center gap-2 text-white">
+        <Clock className="h-6 w-6 text-blue-300" /> Watch Later
       </h1>
       {items.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {items.filter(item => item.video.status === 'READY').map(item => (
             <VideoCard
               key={item.id}
@@ -42,7 +43,13 @@ export default async function WatchLaterPage() {
           ))}
         </div>
       ) : (
-        <p className="text-gray-500 text-center py-16">No videos saved to Watch Later yet. Save videos to watch them here!</p>
+        <EmptyState
+          icon={Clock}
+          title="Nothing saved yet"
+          description="Save videos to Watch Later and build your personal queue."
+          ctaHref="/"
+          ctaLabel="Browse videos"
+        />
       )}
     </div>
   );

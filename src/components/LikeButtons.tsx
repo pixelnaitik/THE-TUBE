@@ -37,7 +37,6 @@ export default function LikeButtons({ videoId }: LikeButtonsProps) {
     });
     const data = await res.json();
 
-    // Optimistic update based on action
     if (data.action === 'added') {
       if (type === 'LIKE') setLikes(l => l + 1);
       else setDislikes(d => d + 1);
@@ -47,26 +46,35 @@ export default function LikeButtons({ videoId }: LikeButtonsProps) {
       else setDislikes(d => d - 1);
       setUserReaction(null);
     } else if (data.action === 'switched') {
-      if (type === 'LIKE') { setLikes(l => l + 1); setDislikes(d => d - 1); }
-      else { setDislikes(d => d + 1); setLikes(l => l - 1); }
+      if (type === 'LIKE') {
+        setLikes(l => l + 1);
+        setDislikes(d => d - 1);
+      } else {
+        setDislikes(d => d + 1);
+        setLikes(l => l - 1);
+      }
       setUserReaction(type);
     }
   };
 
   return (
-    <div className="flex items-center bg-[#222222] rounded-full">
+    <div className="overflow-hidden rounded-full border border-[var(--line)] bg-[var(--surface-2)]">
       <button
         onClick={() => handleReaction('LIKE')}
-        className={`flex items-center gap-2 px-4 py-2.5 md:py-2 rounded-l-full transition-colors border-r border-[#303030] ${userReaction === 'LIKE' ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-[#303030]'}`}
+        className={`flex items-center gap-2 border-r border-[var(--line)] px-4 py-2 text-sm font-semibold transition-colors ${
+          userReaction === 'LIKE' ? 'bg-[var(--accent-soft)] text-blue-200' : 'text-white hover:bg-[var(--surface-3)]'
+        }`}
       >
-        <ThumbsUp className={`w-5 h-5 ${userReaction === 'LIKE' ? 'fill-current' : ''}`} />
-        <span className="text-sm font-medium">{likes || ''}</span>
+        <ThumbsUp className={`h-4 w-4 ${userReaction === 'LIKE' ? 'fill-current' : ''}`} />
+        <span>{likes || ''}</span>
       </button>
       <button
         onClick={() => handleReaction('DISLIKE')}
-        className={`px-4 py-2.5 md:py-2 rounded-r-full transition-colors ${userReaction === 'DISLIKE' ? 'bg-red-500/20 text-red-400' : 'hover:bg-[#303030]'}`}
+        className={`px-4 py-2 transition-colors ${
+          userReaction === 'DISLIKE' ? 'bg-red-500/20 text-red-300' : 'text-white hover:bg-[var(--surface-3)]'
+        }`}
       >
-        <ThumbsUp className={`w-5 h-5 rotate-180 ${userReaction === 'DISLIKE' ? 'fill-current' : ''}`} />
+        <ThumbsUp className={`h-4 w-4 rotate-180 ${userReaction === 'DISLIKE' ? 'fill-current' : ''}`} />
       </button>
     </div>
   );

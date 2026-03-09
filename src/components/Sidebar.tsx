@@ -25,32 +25,36 @@ export default function Sidebar() {
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 z-[55] bg-black/50 md:hidden"
+          className="fixed inset-0 z-[55] bg-black/55 md:hidden"
           onClick={() => setIsOpen(false)}
         />
       )}
 
       <aside
-        className={`fixed left-0 top-14 z-[60] h-[calc(100dvh-56px)] w-56 overflow-y-auto bg-[#0f0f0f] px-2 py-3 hide-scrollbar custom-scrollbar transition-transform duration-300 md:w-20 lg:w-56 ${
+        className={`fixed left-0 top-14 z-[60] h-[calc(100dvh-56px)] w-56 overflow-y-auto bg-[#0b0f17]/95 px-2 py-3 backdrop-blur-md hide-scrollbar custom-scrollbar transition-transform duration-300 md:w-20 lg:w-56 ${
           isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
         {links.map((item, i) =>
           'divider' in item ? (
-            <div key={i} className="my-2 mx-2 border-t border-[#303030] lg:block hidden" />
+            <div key={i} className="my-3 mx-2 hidden border-t border-[var(--line)] lg:block" />
           ) : (
             <Link
               key={item.href}
               href={item.href!}
+              title={item.label}
               onClick={() => setIsOpen(false)}
-              className={`flex items-center rounded-lg px-3 py-2.5 text-sm transition-colors md:justify-center lg:justify-start lg:gap-4 ${
+              className={`group relative mb-1 flex items-center rounded-xl px-3 py-2.5 text-sm transition-all md:justify-center lg:justify-start lg:gap-4 ${
                 pathname === item.href
-                  ? 'bg-[#272727] font-medium text-white'
-                  : 'text-gray-300 hover:bg-[#1a1a1a]'
+                  ? 'bg-[var(--accent-soft)] font-semibold text-blue-200 ring-1 ring-blue-300/30'
+                  : 'text-gray-300 hover:bg-[var(--surface-2)]'
               }`}
             >
               <item.icon className="h-5 w-5 shrink-0" />
               <span className="hidden lg:inline">{item.label}</span>
+              <span className="pointer-events-none absolute left-full ml-2 hidden whitespace-nowrap rounded-md border border-[var(--line)] bg-[var(--surface-1)] px-2 py-1 text-xs text-white opacity-0 shadow-xl transition-opacity group-hover:opacity-100 md:block lg:hidden">
+                {item.label}
+              </span>
             </Link>
           )
         )}

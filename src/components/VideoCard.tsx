@@ -26,24 +26,28 @@ export default function VideoCard({
   hideDetails,
 }: VideoCardProps) {
   return (
-    <div className="flex flex-col gap-3 group cursor-pointer text-white">
-      <Link href={`/watch/${id}`} className="relative block aspect-video w-full rounded-xl overflow-hidden bg-[#222]">
+    <article className="group flex cursor-pointer flex-col gap-3 text-white reveal-up">
+      <Link
+        href={`/watch/${id}`}
+        className="relative block aspect-video w-full overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--surface-1)]"
+      >
         <Image
           src={thumbnail}
           alt={title}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className="object-cover rounded-xl transition-all duration-300 group-hover:scale-105"
+          className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
-        {/* Playback duration badge */}
-        <div className="absolute bottom-1.5 right-1.5 bg-black/80 text-white px-1.5 py-0.5 rounded text-xs font-semibold">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-70" />
+        <div className="absolute inset-0 ring-1 ring-blue-300/0 transition-all duration-300 group-hover:ring-blue-300/25" />
+        <div className="absolute bottom-2 right-2 rounded-md bg-black/80 px-1.5 py-0.5 text-xs font-semibold text-white">
           {duration}
         </div>
       </Link>
-      
+
       {!hideDetails && (
-        <div className="flex gap-3 pr-2">
-          <Link href={`#`} className="flex-shrink-0 mt-1 relative w-9 h-9">
+        <div className="flex gap-3 pr-1">
+          <Link href="#" className="relative mt-0.5 h-9 w-9 shrink-0 overflow-hidden rounded-full border border-[var(--line)]">
             <Image
               src={channelAvatar}
               alt={channelName}
@@ -52,28 +56,31 @@ export default function VideoCard({
               className="rounded-full object-cover"
             />
           </Link>
-          <div className="flex flex-col overflow-hidden flex-1">
-            <Link href={`/watch/${id}`} className="line-clamp-2 text-sm md:text-base font-semibold leading-tight group-hover:text-blue-400 transition-colors pr-4 md:pr-0">
+          <div className="min-w-0 flex-1">
+            <Link
+              href={`/watch/${id}`}
+              className="line-clamp-2 text-sm font-semibold leading-tight transition-colors group-hover:text-blue-300 md:text-base"
+            >
               {title}
             </Link>
-            <div className="text-sm text-[#AAAAAA] mt-1 flex flex-col">
-              <Link href={`#`} className="hover:text-white transition-colors w-fit">
+            <div className="mt-1 flex flex-col text-sm text-muted">
+              <Link href="#" className="w-fit transition-colors hover:text-white">
                 {channelName}
               </Link>
-              <div className="flex flex-wrap items-center text-xs mt-0.5">
+              <div className="mt-0.5 flex flex-wrap items-center text-xs">
                 <span>{views}</span>
-                <span className="mx-1.5 text-[10px]">•</span>
+                <span className="mx-1.5 text-[10px]">&middot;</span>
                 <span>{timestamp}</span>
               </div>
             </div>
           </div>
-          <div className="flex-shrink-0 ml-auto pt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button className="p-1 hover:bg-[#272727] rounded-full">
-              <MoreVertical className="w-5 h-5" />
+          <div className="ml-auto shrink-0 pt-1 opacity-0 transition-opacity group-hover:opacity-100">
+            <button className="rounded-full p-1 transition-colors hover:bg-[var(--surface-3)]" aria-label="More options">
+              <MoreVertical className="h-5 w-5" />
             </button>
           </div>
         </div>
       )}
-    </div>
+    </article>
   );
 }

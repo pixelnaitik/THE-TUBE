@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useSession } from "next-auth/react";
-import { MessageCircle, Send, UserCircle2, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
+
+import { MessageCircle, Send, UserCircle2, ChevronDown, ChevronUp } from "lucide-react";
 import toast from "react-hot-toast";
+
 
 interface Comment {
   id: string;
@@ -99,20 +102,13 @@ export default function CommentSection({ videoId }: CommentSectionProps) {
     setLoading(false);
   };
 
-  const timeAgo = (dateStr: string) => {
-    const s = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-    if (s < 60) return 'just now';
-    if (s < 3600) return `${Math.floor(s / 60)}m ago`;
-    if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
-    return `${Math.floor(s / 86400)}d ago`;
-  };
-
   const totalComments = comments.reduce((sum, c) => sum + 1 + (c.replies?.length || 0), 0);
 
   const toggleReplies = (id: string) => {
     setExpandedReplies(prev => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   };
@@ -121,7 +117,7 @@ export default function CommentSection({ videoId }: CommentSectionProps) {
     <div className={`flex gap-3 ${isReply ? 'ml-8 sm:ml-12' : ''}`}>
       <div className="w-8 h-8 rounded-full bg-[#303030] flex items-center justify-center shrink-0 overflow-hidden">
         {comment.user.image ? (
-          <img src={comment.user.image} alt="" className="w-full h-full object-cover" />
+          <Image src={comment.user.image} alt="User avatar" width={32} height={32} className="w-full h-full object-cover" />
         ) : (
           <UserCircle2 className="w-6 h-6 text-gray-400" />
         )}
@@ -129,7 +125,7 @@ export default function CommentSection({ videoId }: CommentSectionProps) {
       <div className="flex-1">
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold text-white">{comment.user.name || 'Anonymous'}</span>
-          <span className="text-xs text-gray-500">{timeAgo(comment.createdAt)}</span>
+          <span className="text-xs text-gray-500">{formatTimeAgo(comment.createdAt)}</span>
         </div>
         <p className="text-sm text-gray-300 mt-0.5">{comment.text}</p>
         <div className="flex items-center gap-4 mt-1">

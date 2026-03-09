@@ -3,6 +3,7 @@ import { authOptions } from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import VideoCard from '@/components/VideoCard';
+import EmptyState from '@/components/EmptyState';
 import { Users } from 'lucide-react';
 
 export default async function SubscriptionsPage() {
@@ -34,11 +35,11 @@ export default async function SubscriptionsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-        <Users className="w-6 h-6" /> Subscriptions
+      <h1 className="page-title mb-5 flex items-center gap-2 text-white">
+        <Users className="h-6 w-6 text-blue-300" /> Subscriptions
       </h1>
       {allVideos.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {allVideos.map(video => (
             <VideoCard
               key={video.id}
@@ -54,7 +55,13 @@ export default async function SubscriptionsPage() {
           ))}
         </div>
       ) : (
-        <p className="text-gray-500 text-center py-16">No subscriptions yet. Subscribe to channels to see their videos here!</p>
+        <EmptyState
+          icon={Users}
+          title="No subscriptions yet"
+          description="Subscribe to creators you like and their latest uploads will appear here."
+          ctaHref="/"
+          ctaLabel="Explore videos"
+        />
       )}
     </div>
   );

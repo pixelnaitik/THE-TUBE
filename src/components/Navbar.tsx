@@ -67,50 +67,50 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 flex h-14 items-center justify-between border-b border-[#222] bg-[#0f0f0f] px-2 pt-safe sm:px-4">
-      <div className="min-w-0 flex items-center gap-1.5 sm:gap-4">
+    <nav className="fixed top-0 left-0 right-0 z-50 flex h-14 items-center justify-between border-b border-[var(--line)] bg-[#0b0f17]/92 px-2 pt-safe backdrop-blur-md sm:px-4">
+      <div className="min-w-0 flex items-center gap-1 sm:gap-3">
         <button
           aria-label="Toggle sidebar"
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="rounded-full p-2 transition-colors hover:bg-[#272727]"
+          className="rounded-full p-2.5 text-white transition-colors hover:bg-[var(--surface-2)]"
         >
-          <Menu className="h-5 w-5 text-white" />
+          <Menu className="h-5 w-5" />
         </button>
-        <Link href="/" className="min-w-0 flex items-center gap-1 sm:gap-2">
-          <div className="rounded-lg bg-red-600 p-1 text-white">
+        <Link href="/" className="min-w-0 flex items-center gap-2">
+          <div className="rounded-xl bg-red-600 p-1 text-white">
             <Video className="h-5 w-5 fill-current" />
           </div>
-          <span className="hidden text-lg font-bold tracking-tighter text-white sm:inline md:text-xl">MyTube</span>
+          <span className="hidden text-lg font-bold tracking-tight text-white sm:inline md:text-xl">MyTube</span>
         </Link>
       </div>
 
-      <form onSubmit={handleSearch} className="mx-4 hidden max-w-[540px] flex-1 md:flex">
+      <form onSubmit={handleSearch} className="mx-4 hidden max-w-[560px] flex-1 md:flex">
         <div className="flex w-full">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search"
-            className="w-full rounded-l-full border border-[#303030] bg-[#121212] px-4 py-2 text-white outline-none transition-colors placeholder:text-gray-500 focus:border-blue-500"
+            placeholder="Search videos"
+            className="w-full rounded-l-full border border-[var(--line)] bg-[var(--surface-1)] px-4 py-2 text-white outline-none transition-colors placeholder:text-muted focus:border-blue-400"
           />
-          <button type="submit" aria-label="Search" className="rounded-r-full border border-[#303030] border-l-0 bg-[#222] px-5 transition-colors hover:bg-[#303030]">
+          <button type="submit" aria-label="Search" className="rounded-r-full border border-[var(--line)] border-l-0 bg-[var(--surface-2)] px-5 transition-colors hover:bg-[var(--surface-3)]">
             <Search className="h-5 w-5 text-white" />
           </button>
         </div>
       </form>
 
-      <div className="flex items-center gap-0.5 sm:gap-1.5">
+      <div className="flex items-center gap-1">
         <button
           aria-label="Open search"
           onClick={() => setShowMobileSearch(true)}
-          className="rounded-full p-2 text-white transition-colors hover:bg-[#272727] md:hidden"
+          className="rounded-full p-2.5 text-white transition-colors hover:bg-[var(--surface-2)] md:hidden"
         >
           <Search className="h-5 w-5" />
         </button>
 
         {session ? (
           <>
-            <Link href="/upload" className="mr-0.5 flex items-center gap-1 rounded-full bg-[#222] px-2.5 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#303030] sm:gap-1.5 sm:px-3 sm:text-sm">
+            <Link href="/upload" className="mr-1 flex items-center gap-1 rounded-full bg-[var(--surface-2)] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[var(--surface-3)] sm:text-sm">
               <Plus className="h-4 w-4" />
               <span className="hidden sm:inline">Create</span>
             </Link>
@@ -122,7 +122,7 @@ export default function Navbar() {
                   setShowNotifs(!showNotifs);
                   if (!showNotifs) markAllRead();
                 }}
-                className="relative rounded-full p-2 transition-colors hover:bg-[#272727]"
+                className="relative rounded-full p-2.5 transition-colors hover:bg-[var(--surface-2)]"
               >
                 <Bell className="h-5 w-5 text-white" />
                 {unreadCount > 0 && (
@@ -133,8 +133,8 @@ export default function Navbar() {
               </button>
 
               {showNotifs && (
-                <div className="absolute right-0 top-full mt-2 max-h-96 w-[min(22rem,calc(100vw-1rem))] overflow-y-auto rounded-xl border border-[#303030] bg-[#1a1a1a] shadow-2xl">
-                  <div className="border-b border-[#303030] p-3">
+                <div className="surface-card absolute right-0 top-full z-50 mt-2 max-h-96 w-[min(22rem,calc(100vw-1rem))] overflow-y-auto rounded-xl">
+                  <div className="border-b border-[var(--line)] p-3">
                     <h3 className="text-sm font-semibold text-white">Notifications</h3>
                   </div>
                   {notifications.length > 0 ? notifications.map(n => (
@@ -142,13 +142,13 @@ export default function Navbar() {
                       key={n.id}
                       href={n.link || '#'}
                       onClick={() => setShowNotifs(false)}
-                      className={`block border-b border-[#222] px-3 py-2.5 transition-colors hover:bg-[#272727] ${!n.read ? 'bg-blue-500/5' : ''}`}
+                      className={`block border-b border-[var(--line)] px-3 py-2.5 transition-colors hover:bg-[var(--surface-2)] ${!n.read ? 'bg-blue-500/8' : ''}`}
                     >
                       <p className="text-sm text-white">{n.message}</p>
-                      <p className="mt-0.5 text-xs text-gray-500">{timeAgo(n.createdAt)} ago</p>
+                      <p className="mt-0.5 text-xs text-muted">{timeAgo(n.createdAt)} ago</p>
                     </Link>
                   )) : (
-                    <p className="py-6 text-center text-sm text-gray-500">No notifications</p>
+                    <p className="py-6 text-center text-sm text-muted">No notifications</p>
                   )}
                 </div>
               )}
@@ -158,7 +158,7 @@ export default function Navbar() {
               <button
                 aria-label="User menu"
                 onClick={() => setShowUserMenu(!showUserMenu)}
-                className="ml-1 flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-purple-600 text-sm font-medium text-white transition-all hover:ring-2 hover:ring-purple-400"
+                className="ml-1 flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-indigo-600 text-sm font-semibold text-white transition-all hover:ring-2 hover:ring-blue-300/50"
               >
                 {session.user?.image ? (
                   <img src={session.user.image} alt="" className="h-full w-full object-cover" />
@@ -168,9 +168,9 @@ export default function Navbar() {
               </button>
 
               {showUserMenu && (
-                <div className="absolute right-0 top-full z-50 mt-2 w-[min(16rem,calc(100vw-1rem))] rounded-xl border border-[#303030] bg-[#1a1a1a] py-2 shadow-2xl">
-                  <div className="flex items-center gap-3 border-b border-[#303030] px-4 py-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-purple-600 text-white">
+                <div className="surface-card absolute right-0 top-full z-50 mt-2 w-[min(16rem,calc(100vw-1rem))] rounded-xl py-2">
+                  <div className="flex items-center gap-3 border-b border-[var(--line)] px-4 py-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-indigo-600 text-white">
                       {session.user?.image ? (
                         <img src={session.user.image} alt="" className="h-full w-full object-cover" />
                       ) : (
@@ -179,19 +179,19 @@ export default function Navbar() {
                     </div>
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-white">{session.user?.name || 'User'}</p>
-                      <p className="truncate text-xs text-gray-400">{session.user?.email}</p>
+                      <p className="truncate text-xs text-muted">{session.user?.email}</p>
                     </div>
                   </div>
                   <Link
                     href="/profile"
                     onClick={() => setShowUserMenu(false)}
-                    className="mt-1 flex items-center gap-3 px-4 py-2.5 text-sm text-white transition-colors hover:bg-[#272727]"
+                    className="mt-1 flex items-center gap-3 px-4 py-2.5 text-sm text-white transition-colors hover:bg-[var(--surface-2)]"
                   >
                     <User className="h-4 w-4" /> Your profile
                   </Link>
                   <button
                     onClick={() => signOut()}
-                    className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-white transition-colors hover:bg-[#272727]"
+                    className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-white transition-colors hover:bg-[var(--surface-2)]"
                   >
                     <LogOut className="h-4 w-4" /> Sign out
                   </button>
@@ -200,7 +200,7 @@ export default function Navbar() {
             </div>
           </>
         ) : (
-          <Link href="/login" className="flex items-center gap-1.5 rounded-full border border-blue-400/40 px-2.5 py-1.5 text-sm font-medium text-blue-400 transition-colors hover:bg-blue-400/10 sm:px-3">
+          <Link href="/login" className="flex items-center gap-1.5 rounded-full border border-blue-300/30 px-3 py-1.5 text-sm font-semibold text-blue-200 transition-colors hover:bg-blue-500/10">
             <UserCircle2 className="h-5 w-5" />
             <span className="hidden sm:inline">Sign in</span>
           </Link>
@@ -208,11 +208,11 @@ export default function Navbar() {
       </div>
 
       {showMobileSearch && (
-        <div className="absolute inset-0 z-50 flex items-center bg-[#0f0f0f] px-2 md:hidden">
+        <div className="absolute inset-0 z-50 flex items-center bg-[#0b0f17] px-2 md:hidden">
           <button
             aria-label="Close search"
             onClick={() => setShowMobileSearch(false)}
-            className="mr-2 shrink-0 rounded-full p-2 text-white transition-colors hover:bg-[#272727]"
+            className="mr-2 shrink-0 rounded-full p-2.5 text-white transition-colors hover:bg-[var(--surface-2)]"
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
@@ -223,9 +223,9 @@ export default function Navbar() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search"
-              className="w-full rounded-l-full border border-[#303030] bg-[#121212] px-4 py-2 text-white outline-none transition-colors placeholder:text-gray-500 focus:border-blue-500"
+              className="w-full rounded-l-full border border-[var(--line)] bg-[var(--surface-1)] px-4 py-2 text-white outline-none transition-colors placeholder:text-muted focus:border-blue-400"
             />
-            <button type="submit" aria-label="Search" className="shrink-0 rounded-r-full border border-[#303030] border-l-0 bg-[#222] px-4 transition-colors hover:bg-[#303030]">
+            <button type="submit" aria-label="Search" className="shrink-0 rounded-r-full border border-[var(--line)] border-l-0 bg-[var(--surface-2)] px-4 transition-colors hover:bg-[var(--surface-3)]">
               <Search className="h-4 w-4 text-white" />
             </button>
           </form>

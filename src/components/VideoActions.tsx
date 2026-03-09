@@ -15,7 +15,7 @@ interface VideoActionsProps {
   tags: string;
 }
 
-export default function VideoActions({ videoId, authorId, title, description, tags }: VideoActionsProps) {
+export default function VideoActions({ videoId, title, description, tags }: VideoActionsProps) {
   const { data: session } = useSession();
   const router = useRouter();
   const [showMenu, setShowMenu] = useState(false);
@@ -29,7 +29,6 @@ export default function VideoActions({ videoId, authorId, title, description, ta
 
   const isAuthor = session?.user?.email;
 
-  // Check watch later status
   useEffect(() => {
     if (session) {
       fetch('/api/watch-later')
@@ -48,7 +47,6 @@ export default function VideoActions({ videoId, authorId, title, description, ta
       return router.push('/login');
     }
 
-    // Optimistic UI update
     setSavedToWatchLater(!savedToWatchLater);
     const prev = savedToWatchLater;
 
@@ -62,7 +60,7 @@ export default function VideoActions({ videoId, authorId, title, description, ta
       setSavedToWatchLater(data.watchLater);
       toast.success(data.watchLater ? 'Saved to Watch Later' : 'Removed from Watch Later');
     } catch {
-      setSavedToWatchLater(prev); // Revert on failure
+      setSavedToWatchLater(prev);
       toast.error('Failed to update Watch Later');
     }
   };
@@ -105,59 +103,56 @@ export default function VideoActions({ videoId, authorId, title, description, ta
 
   return (
     <>
-      <div className="flex items-center gap-2 flex-wrap">
-        {/* Save to Watch Later */}
+      <div className="flex flex-wrap items-center gap-2">
         <button
           onClick={handleToggleWatchLater}
-          className={`flex items-center gap-2 px-4 py-2.5 md:py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-            savedToWatchLater ? 'bg-blue-600/20 text-blue-400 hover:bg-blue-600/30' : 'bg-[#222222] hover:bg-[#303030] text-white'
+          className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+            savedToWatchLater ? 'bg-[var(--accent-soft)] text-blue-200' : 'bg-[var(--surface-2)] text-white hover:bg-[var(--surface-3)]'
           }`}
         >
-          {savedToWatchLater ? <BookmarkCheck className="w-4 h-4 fill-current" /> : <Bookmark className="w-4 h-4" />}
+          {savedToWatchLater ? <BookmarkCheck className="h-4 w-4 fill-current" /> : <Bookmark className="h-4 w-4" />}
           {savedToWatchLater ? 'Saved' : 'Save'}
         </button>
 
-        {/* Share Button */}
         <button
           onClick={handleShare}
-          className="flex items-center gap-2 px-4 py-2.5 md:py-2 bg-[#222222] hover:bg-[#303030] rounded-full text-white text-sm font-medium whitespace-nowrap transition-colors"
+          className="flex items-center gap-2 rounded-full bg-[var(--surface-2)] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[var(--surface-3)]"
         >
-          {copied ? <Check className="w-4 h-4 text-green-400" /> : <Share2 className="w-4 h-4" />}
+          {copied ? <Check className="h-4 w-4 text-green-400" /> : <Share2 className="h-4 w-4" />}
           Share
         </button>
 
-        {/* More Menu */}
         <div className="relative">
           <button
             onClick={() => setShowMenu(!showMenu)}
-            className="p-2.5 md:p-2 bg-[#222222] hover:bg-[#303030] rounded-full text-white transition-colors"
+            className="rounded-full bg-[var(--surface-2)] p-2 text-white transition-colors hover:bg-[var(--surface-3)]"
           >
-            <MoreHorizontal className="w-5 h-5" />
+            <MoreHorizontal className="h-5 w-5" />
           </button>
 
           {showMenu && (
-            <div className="absolute right-0 top-full mt-2 w-56 bg-[#1a1a1a] border border-[#303030] rounded-xl overflow-hidden shadow-2xl z-20">
+            <div className="surface-card absolute right-0 top-full z-20 mt-2 w-56 overflow-hidden rounded-xl border border-[var(--line)]">
               <button
                 onClick={() => { setShowPlaylistModal(true); setShowMenu(false); }}
-                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#272727] text-white text-sm transition-colors"
+                className="flex w-full items-center gap-3 px-4 py-3 text-sm text-white transition-colors hover:bg-[var(--surface-2)]"
               >
-                <PlusCircle className="w-4 h-4" /> Save to playlist
+                <PlusCircle className="h-4 w-4" /> Save to playlist
               </button>
-              
+
               {isAuthor && (
                 <>
-                  <div className="border-t border-[#303030]"></div>
+                  <div className="border-t border-[var(--line)]" />
                   <button
                     onClick={() => { setEditing(true); setShowMenu(false); }}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#272727] text-white text-sm transition-colors"
+                    className="flex w-full items-center gap-3 px-4 py-3 text-sm text-white transition-colors hover:bg-[var(--surface-2)]"
                   >
-                    <Pencil className="w-4 h-4" /> Edit video
+                    <Pencil className="h-4 w-4" /> Edit video
                   </button>
                   <button
                     onClick={() => { handleDelete(); setShowMenu(false); }}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#272727] text-red-400 text-sm transition-colors"
+                    className="flex w-full items-center gap-3 px-4 py-3 text-sm text-red-300 transition-colors hover:bg-[var(--surface-2)]"
                   >
-                    <Trash2 className="w-4 h-4" /> Delete video
+                    <Trash2 className="h-4 w-4" /> Delete video
                   </button>
                 </>
               )}
@@ -168,37 +163,36 @@ export default function VideoActions({ videoId, authorId, title, description, ta
 
       {showPlaylistModal && <PlaylistModal videoId={videoId} onClose={() => setShowPlaylistModal(false)} />}
 
-      {/* Edit Modal */}
       {editing && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-[#1a1a1a] rounded-xl p-6 w-full max-w-lg border border-[#303030]">
-            <div className="flex items-center justify-between mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="surface-card w-full max-w-lg rounded-xl border border-[var(--line)] p-6">
+            <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-semibold text-white">Edit Video</h3>
-              <button onClick={() => setEditing(false)} className="text-gray-400 hover:text-white"><X className="w-5 h-5" /></button>
+              <button onClick={() => setEditing(false)} className="text-gray-400 hover:text-white"><X className="h-5 w-5" /></button>
             </div>
-            <label className="text-sm text-gray-400 block mb-1">Title</label>
+            <label className="mb-1 block text-sm text-muted">Title</label>
             <input
               value={editTitle}
               onChange={e => setEditTitle(e.target.value)}
-              className="w-full bg-[#222] border border-[#444] rounded-lg px-3 py-2 text-white mb-3 outline-none focus:border-blue-500"
+              className="mb-3 w-full rounded-lg border border-[var(--line)] bg-[var(--surface-1)] px-3 py-2 text-white outline-none focus:border-blue-400"
             />
-            <label className="text-sm text-gray-400 block mb-1">Description</label>
+            <label className="mb-1 block text-sm text-muted">Description</label>
             <textarea
               value={editDesc}
               onChange={e => setEditDesc(e.target.value)}
               rows={3}
-              className="w-full bg-[#222] border border-[#444] rounded-lg px-3 py-2 text-white mb-3 outline-none focus:border-blue-500 resize-none"
+              className="mb-3 w-full resize-none rounded-lg border border-[var(--line)] bg-[var(--surface-1)] px-3 py-2 text-white outline-none focus:border-blue-400"
             />
-            <label className="text-sm text-gray-400 block mb-1">Tags (comma-separated)</label>
+            <label className="mb-1 block text-sm text-muted">Tags (comma-separated)</label>
             <input
               value={editTags}
               onChange={e => setEditTags(e.target.value)}
               placeholder="Gaming, Music, Vlog"
-              className="w-full bg-[#222] border border-[#444] rounded-lg px-3 py-2 text-white mb-4 outline-none focus:border-blue-500"
+              className="mb-4 w-full rounded-lg border border-[var(--line)] bg-[var(--surface-1)] px-3 py-2 text-white outline-none focus:border-blue-400"
             />
             <div className="flex justify-end gap-2">
-              <button onClick={() => setEditing(false)} className="px-4 py-2 text-sm text-gray-400 hover:text-white">Cancel</button>
-              <button onClick={handleSaveEdit} className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium">Save</button>
+              <button onClick={() => setEditing(false)} className="px-4 py-2 text-sm text-muted hover:text-white">Cancel</button>
+              <button onClick={handleSaveEdit} className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--accent-strong)]">Save</button>
             </div>
           </div>
         </div>

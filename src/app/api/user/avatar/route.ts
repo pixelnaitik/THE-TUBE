@@ -5,6 +5,9 @@ import { prisma } from '@/lib/prisma';
 import fs from 'fs';
 import path from 'path';
 
+const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024;
+const ALLOWED_AVATAR_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+
 // POST /api/user/avatar — Upload user avatar
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -13,6 +16,12 @@ export async function POST(req: NextRequest) {
   const formData = await req.formData();
   const file = formData.get('avatar') as File | null;
   if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+  if (!ALLOWED_AVATAR_MIME_TYPES.has(file.type)) {
+    return NextResponse.json({ error: 'Unsupported avatar format' }, { status: 400 });
+  }
+  if (file.size > MAX_AVATAR_SIZE_BYTES) {
+    return NextResponse.json({ error: 'Avatar is too large (max 5MB)' }, { status: 400 });
+  }
 
   const user = await prisma.user.findUnique({ where: { email: session.user.email } });
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });

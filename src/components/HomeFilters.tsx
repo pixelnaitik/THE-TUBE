@@ -20,15 +20,16 @@ export default function HomeFilters({ currentSort, currentTag }: HomeFiltersProp
   };
 
   return (
-    <div className="flex flex-col gap-3">
-      {/* Tag chips */}
-      <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar custom-scrollbar">
+    <section className="surface-card reveal-up rounded-2xl p-3 sm:p-4">
+      <div className="mb-3 flex gap-2 overflow-x-auto pb-1 hide-scrollbar custom-scrollbar">
         {TAGS.map(tag => (
           <button
             key={tag}
             onClick={() => setFilter(currentSort, tag)}
-            className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              currentTag === tag ? 'bg-white text-black' : 'bg-[#272727] text-white hover:bg-[#3f3f3f]'
+            className={`whitespace-nowrap rounded-xl px-3 py-1.5 text-sm font-medium transition-all duration-200 ${
+              currentTag === tag
+                ? 'bg-[var(--accent)] text-white shadow-[0_6px_18px_rgba(37,99,235,0.35)]'
+                : 'bg-[var(--surface-2)] text-gray-200 hover:bg-[var(--surface-3)]'
             }`}
           >
             {tag}
@@ -36,7 +37,6 @@ export default function HomeFilters({ currentSort, currentTag }: HomeFiltersProp
         ))}
       </div>
 
-      {/* Sort buttons */}
       <div className="flex flex-wrap gap-2">
         {[
           { key: 'newest', label: 'Newest' },
@@ -46,18 +46,16 @@ export default function HomeFilters({ currentSort, currentTag }: HomeFiltersProp
           <button
             key={key}
             onClick={() => setFilter(key, currentTag)}
-            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+            className={`rounded-full px-3 py-1.5 text-xs font-semibold tracking-wide transition-colors ${
               currentSort === key
-                ? 'bg-blue-600 text-white'
-                : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#272727] hover:text-white'
+                ? 'bg-[var(--accent-soft)] text-blue-200 ring-1 ring-blue-300/35'
+                : 'bg-[var(--surface-1)] text-muted hover:bg-[var(--surface-2)] hover:text-white'
             }`}
           >
             {label}
           </button>
         ))}
       </div>
-    </div>
+    </section>
   );
 }
-
-

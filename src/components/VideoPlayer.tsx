@@ -29,11 +29,10 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
   const [settingsMenu, setSettingsMenu] = useState<'none' | 'main' | 'speed' | 'quality'>('none');
   const [playbackRate, setPlaybackRate] = useState(1);
   const [qualities, setQualities] = useState<QualityLevel[]>([]);
-  const [currentQuality, setCurrentQuality] = useState(-1); // -1 = Auto
+  const [currentQuality, setCurrentQuality] = useState(-1);
   const [autoLabel, setAutoLabel] = useState('Auto');
   const controlTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  // Initialize HLS or native video
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -62,19 +61,21 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
         }
       });
 
-      return () => { hls.destroy(); hlsRef.current = null; };
+      return () => {
+        hls.destroy();
+        hlsRef.current = null;
+      };
     } else {
       video.src = src;
     }
   }, [src]);
 
-  // Quality change handler
   const handleQualityChange = useCallback((levelIndex: number) => {
     const hls = hlsRef.current;
     if (!hls) return;
 
     if (levelIndex === -1) {
-      hls.currentLevel = -1; // Auto
+      hls.currentLevel = -1;
       setCurrentQuality(-1);
       setAutoLabel('Auto');
     } else {
@@ -84,7 +85,6 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
     setSettingsMenu('none');
   }, []);
 
-  // Handle double-tap to seek
   const handleDoubleTap = useCallback((e: React.MouseEvent) => {
     const video = videoRef.current;
     const container = containerRef.current;
@@ -96,7 +96,6 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
     video.currentTime += x < half ? -10 : 10;
   }, []);
 
-  // Playback controls
   const togglePlay = () => {
     const video = videoRef.current;
     if (!video) return;
@@ -138,7 +137,6 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
     document.fullscreenElement ? document.exitFullscreen() : container.requestFullscreen();
   };
 
-  // Auto-hide controls
   const showControlsTemporarily = useCallback(() => {
     setShowControls(true);
     if (controlTimeoutRef.current) clearTimeout(controlTimeoutRef.current);
@@ -147,12 +145,10 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
     }, 3000);
   }, []);
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       const video = videoRef.current;
       if (!video) return;
-      // Ignore if user is typing in an input
       if ((e.target as HTMLElement).tagName === 'INPUT' || (e.target as HTMLElement).tagName === 'TEXTAREA') return;
 
       switch (e.key.toLowerCase()) {
@@ -162,21 +158,12 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
         case 'm': e.preventDefault(); toggleMute(); break;
         case 'arrowleft': e.preventDefault(); video.currentTime -= 5; showControlsTemporarily(); break;
         case 'arrowright': e.preventDefault(); video.currentTime += 5; showControlsTemporarily(); break;
-        case 'arrowup': e.preventDefault(); video.volume = Math.min(1, video.volume + 0.1); setVolume(video.volume); break;
-        case 'arrowdown': e.preventDefault(); video.volume = Math.max(0, video.volume - 0.1); setVolume(video.volume); break;
-        case '>': video.playbackRate = Math.min(2, video.playbackRate + 0.25); setPlaybackRate(video.playbackRate); break;
-        case '<': video.playbackRate = Math.max(0.25, video.playbackRate - 0.25); setPlaybackRate(video.playbackRate); break;
-        case 'p': e.preventDefault();
-          if (document.pictureInPictureElement) document.exitPictureInPicture();
-          else video.requestPictureInPicture().catch(() => {});
-          break;
       }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, []);
+  }, [showControlsTemporarily]);
 
-  // Video event listeners
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -208,78 +195,64 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
   return (
     <div
       ref={containerRef}
-      className="relative w-full aspect-video max-w-full bg-black md:rounded-xl overflow-hidden group mx-auto"
+      className="group relative mx-auto w-full max-w-full overflow-hidden rounded-xl bg-black"
       onMouseMove={showControlsTemporarily}
       onDoubleClick={handleDoubleTap}
     >
-      <video ref={videoRef} className="w-full h-full object-contain" onClick={togglePlay} playsInline />
+      <video ref={videoRef} className="aspect-video h-full w-full object-contain" onClick={togglePlay} playsInline />
 
-      {/* Controls overlay */}
       <div className={`absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/80 via-transparent to-transparent transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-        {/* Progress bar */}
-        <div className="px-3 mb-1">
+        <div className="mb-1 px-3">
           <input
             type="range"
             min={0}
             max={duration || 0}
             value={currentTime}
             onChange={handleSeek}
-            className="w-full h-1 appearance-none bg-white/30 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-red-500 [&::-webkit-slider-thumb]:cursor-pointer"
+            className="h-1 w-full cursor-pointer appearance-none rounded-full bg-white/30 [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-red-500"
             style={{
               background: `linear-gradient(to right, #ef4444 0%, #ef4444 ${(currentTime / (duration || 1)) * 100}%, rgba(255,255,255,0.3) ${(currentTime / (duration || 1)) * 100}%, rgba(255,255,255,0.3) 100%)`
             }}
           />
         </div>
 
-        {/* Bottom controls */}
-        <div className="flex items-center justify-between px-2 md:px-3 pb-2.5">
+        <div className="flex items-center justify-between px-2 pb-2.5 md:px-3">
           <div className="flex items-center gap-1 md:gap-2">
-            <button onClick={togglePlay} className="p-2.5 hover:bg-white/10 rounded-full transition-colors">
-              {isPlaying ? <Pause className="w-6 h-6 md:w-5 md:h-5 text-white fill-current" /> : <Play className="w-6 h-6 md:w-5 md:h-5 text-white fill-current" />}
+            <button onClick={togglePlay} className="rounded-full p-2.5 transition-colors hover:bg-white/10">
+              {isPlaying ? <Pause className="h-6 w-6 fill-current text-white md:h-5 md:w-5" /> : <Play className="h-6 w-6 fill-current text-white md:h-5 md:w-5" />}
             </button>
 
-            {/* Volume */}
-            <div className="flex items-center gap-1 group/vol">
-              <button onClick={toggleMute} className="p-2.5 hover:bg-white/10 rounded-full transition-colors hidden sm:block">
-                {isMuted || volume === 0 ? <VolumeX className="w-5 h-5 text-white" /> : <Volume2 className="w-5 h-5 text-white" />}
+            <div className="group/vol hidden items-center gap-1 sm:flex">
+              <button onClick={toggleMute} className="rounded-full p-2.5 transition-colors hover:bg-white/10">
+                {isMuted || volume === 0 ? <VolumeX className="h-5 w-5 text-white" /> : <Volume2 className="h-5 w-5 text-white" />}
               </button>
               <input
                 type="range" min={0} max={1} step={0.05} value={isMuted ? 0 : volume}
                 onChange={handleVolumeChange}
-                className="w-0 group-hover/vol:w-20 overflow-hidden transition-all duration-200 h-1 appearance-none bg-white/30 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-0 [&::-webkit-slider-thumb]:h-0 group-hover/vol:[&::-webkit-slider-thumb]:w-3 group-hover/vol:[&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:transition-all"
+                className="h-1 w-0 cursor-pointer appearance-none overflow-hidden rounded-full bg-white/30 transition-all duration-200 group-hover/vol:w-20"
               />
             </div>
 
-            <span className="text-white text-xs ml-1 font-medium">{formatTime(currentTime)} / {formatTime(duration)}</span>
+            <span className="ml-1 text-xs font-medium text-white">{formatTime(currentTime)} / {formatTime(duration)}</span>
           </div>
 
-          <div className="flex items-center gap-0 md:gap-1 relative">
-            {/* Settings button */}
-            <button onClick={() => setSettingsMenu(settingsMenu === 'none' ? 'main' : 'none')} className="p-2.5 hover:bg-white/10 rounded-full transition-colors">
-              <Settings className={`w-6 h-6 md:w-5 md:h-5 text-white transition-transform ${settingsMenu !== 'none' ? 'rotate-45' : ''}`} />
+          <div className="relative flex items-center gap-0 md:gap-1">
+            <button onClick={() => setSettingsMenu(settingsMenu === 'none' ? 'main' : 'none')} className="rounded-full p-2.5 transition-colors hover:bg-white/10">
+              <Settings className={`h-6 w-6 text-white transition-transform md:h-5 md:w-5 ${settingsMenu !== 'none' ? 'rotate-45' : ''}`} />
             </button>
 
-            {/* Settings Menu */}
             {settingsMenu !== 'none' && (
-              <div className="absolute bottom-full right-0 mb-2 bg-[#1a1a1a]/95 backdrop-blur-md rounded-xl overflow-hidden shadow-2xl border border-white/10 min-w-[220px]">
+              <div className="absolute bottom-full right-0 mb-2 min-w-[220px] overflow-hidden rounded-xl border border-white/10 bg-[#1a1a1a]/95 shadow-2xl backdrop-blur-md">
                 {settingsMenu === 'main' && (
                   <div className="py-1">
-                    <button
-                      onClick={() => setSettingsMenu('speed')}
-                      className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-white/10 text-white text-sm transition-colors"
-                    >
+                    <button onClick={() => setSettingsMenu('speed')} className="flex w-full items-center justify-between px-4 py-2.5 text-sm text-white transition-colors hover:bg-white/10">
                       <span>Playback speed</span>
                       <span className="text-gray-400">{playbackRate === 1 ? 'Normal' : `${playbackRate}x`}</span>
                     </button>
                     {qualities.length > 0 && (
-                      <button
-                        onClick={() => setSettingsMenu('quality')}
-                        className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-white/10 text-white text-sm transition-colors"
-                      >
+                      <button onClick={() => setSettingsMenu('quality')} className="flex w-full items-center justify-between px-4 py-2.5 text-sm text-white transition-colors hover:bg-white/10">
                         <span>Quality</span>
-                        <span className="text-gray-400">
-                          {currentQuality === -1 ? autoLabel : `${qualities.find(q => q.index === currentQuality)?.name}`}
-                        </span>
+                        <span className="text-gray-400">{currentQuality === -1 ? autoLabel : `${qualities.find(q => q.index === currentQuality)?.name}`}</span>
                       </button>
                     )}
                   </div>
@@ -287,17 +260,13 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
 
                 {settingsMenu === 'speed' && (
                   <div className="py-1">
-                    <button onClick={() => setSettingsMenu('main')} className="w-full flex items-center gap-2 px-4 py-2 hover:bg-white/10 text-white text-sm font-semibold border-b border-white/10 transition-colors">
-                      ← Playback speed
+                    <button onClick={() => setSettingsMenu('main')} className="flex w-full items-center gap-2 border-b border-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/10">
+                      <span>{'<'}</span> Playback speed
                     </button>
                     {speedOptions.map(speed => (
-                      <button
-                        key={speed}
-                        onClick={() => changeSpeed(speed)}
-                        className="w-full flex items-center justify-between px-4 py-2 hover:bg-white/10 text-white text-sm transition-colors"
-                      >
+                      <button key={speed} onClick={() => changeSpeed(speed)} className="flex w-full items-center justify-between px-4 py-2 text-sm text-white transition-colors hover:bg-white/10">
                         <span>{speed === 1 ? 'Normal' : `${speed}x`}</span>
-                        {playbackRate === speed && <Check className="w-4 h-4 text-blue-400" />}
+                        {playbackRate === speed && <Check className="h-4 w-4 text-blue-400" />}
                       </button>
                     ))}
                   </div>
@@ -305,24 +274,17 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
 
                 {settingsMenu === 'quality' && (
                   <div className="py-1">
-                    <button onClick={() => setSettingsMenu('main')} className="w-full flex items-center gap-2 px-4 py-2 hover:bg-white/10 text-white text-sm font-semibold border-b border-white/10 transition-colors">
-                      ← Quality
+                    <button onClick={() => setSettingsMenu('main')} className="flex w-full items-center gap-2 border-b border-white/10 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/10">
+                      <span>{'<'}</span> Quality
                     </button>
-                    <button
-                      onClick={() => handleQualityChange(-1)}
-                      className="w-full flex items-center justify-between px-4 py-2 hover:bg-white/10 text-white text-sm transition-colors"
-                    >
+                    <button onClick={() => handleQualityChange(-1)} className="flex w-full items-center justify-between px-4 py-2 text-sm text-white transition-colors hover:bg-white/10">
                       <span>{autoLabel}</span>
-                      {currentQuality === -1 && <Check className="w-4 h-4 text-blue-400" />}
+                      {currentQuality === -1 && <Check className="h-4 w-4 text-blue-400" />}
                     </button>
                     {qualities.map(q => (
-                      <button
-                        key={q.index}
-                        onClick={() => handleQualityChange(q.index)}
-                        className="w-full flex items-center justify-between px-4 py-2 hover:bg-white/10 text-white text-sm transition-colors"
-                      >
+                      <button key={q.index} onClick={() => handleQualityChange(q.index)} className="flex w-full items-center justify-between px-4 py-2 text-sm text-white transition-colors hover:bg-white/10">
                         <span>{q.name}</span>
-                        {currentQuality === q.index && <Check className="w-4 h-4 text-blue-400" />}
+                        {currentQuality === q.index && <Check className="h-4 w-4 text-blue-400" />}
                       </button>
                     ))}
                   </div>
@@ -330,8 +292,8 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
               </div>
             )}
 
-            <button onClick={toggleFullscreen} className="p-2.5 hover:bg-white/10 rounded-full transition-colors">
-              <Maximize className="w-6 h-6 md:w-5 md:h-5 text-white" />
+            <button onClick={toggleFullscreen} className="rounded-full p-2.5 transition-colors hover:bg-white/10">
+              <Maximize className="h-6 w-6 text-white md:h-5 md:w-5" />
             </button>
           </div>
         </div>

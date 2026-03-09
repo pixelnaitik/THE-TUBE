@@ -2,7 +2,8 @@ import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import VideoCard from '@/components/VideoCard';
 import SubscribeButton from '@/components/SubscribeButton';
-import { UserCircle2 } from 'lucide-react';
+import EmptyState from '@/components/EmptyState';
+import { UserCircle2, Video } from 'lucide-react';
 
 interface ChannelPageProps {
   params: Promise<{ userId: string }>;
@@ -14,7 +15,7 @@ export default async function ChannelPage({ params }: ChannelPageProps) {
   const channel = await prisma.user.findUnique({
     where: { id: userId },
     include: {
-      videos: { where: { status: 'READY' }, orderBy: { createdAt: 'desc' }, },
+      videos: { where: { status: 'READY' }, orderBy: { createdAt: 'desc' } },
       subscribers: true,
     }
   });
@@ -22,38 +23,36 @@ export default async function ChannelPage({ params }: ChannelPageProps) {
   if (!channel) return notFound();
 
   const subscriberCount = channel.subscribers.length;
-
   const formatDate = (date: Date) => date.toLocaleDateString();
 
   return (
     <div>
-      {/* Channel Banner */}
-      <div className="mb-4 h-24 rounded-xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 sm:mb-6 sm:h-32"></div>
+      <div className="mb-5 h-24 rounded-2xl bg-gradient-to-r from-blue-600 via-cyan-500 to-teal-400 sm:h-32" />
 
-      {/* Channel Info */}
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start">
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#303030] sm:h-20 sm:w-20">
-          {channel.image ? (
-            <img src={channel.image} alt="" className="w-full h-full object-cover" />
-          ) : (
-            <UserCircle2 className="w-14 h-14 text-gray-400" />
-          )}
-        </div>
-        <div className="flex-1">
-          <h1 className="text-xl font-bold text-white sm:text-2xl">{channel.name || 'Creator'}</h1>
-          <p className="text-sm text-gray-400 mt-1">
-            {subscriberCount} subscriber{subscriberCount !== 1 ? 's' : ''} - {channel.videos.length} video{channel.videos.length !== 1 ? 's' : ''}
-          </p>
-          <div className="mt-3">
-            <SubscribeButton channelId={channel.id} />
+      <section className="surface-card mb-8 rounded-2xl p-4 sm:p-5">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[var(--line)] bg-[var(--surface-2)] sm:h-20 sm:w-20">
+            {channel.image ? (
+              <img src={channel.image} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <UserCircle2 className="h-14 w-14 text-gray-400" />
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <h1 className="page-title text-white">{channel.name || 'Creator'}</h1>
+            <p className="mt-1 text-sm text-muted">
+              {subscriberCount} subscriber{subscriberCount !== 1 ? 's' : ''} <span className="mx-1">&middot;</span> {channel.videos.length} video{channel.videos.length !== 1 ? 's' : ''}
+            </p>
+            <div className="mt-3">
+              <SubscribeButton channelId={channel.id} />
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Videos */}
-      <h2 className="text-lg font-semibold text-white mb-4">Videos</h2>
+      <h2 className="section-title mb-4 text-white">Videos</h2>
       {channel.videos.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {channel.videos.map(video => (
             <VideoCard
               key={video.id}
@@ -69,10 +68,12 @@ export default async function ChannelPage({ params }: ChannelPageProps) {
           ))}
         </div>
       ) : (
-        <p className="text-gray-500 text-center py-12">No videos uploaded yet.</p>
+        <EmptyState
+          icon={Video}
+          title="No uploads yet"
+          description="This channel has not published videos yet. Check back soon."
+        />
       )}
     </div>
   );
 }
-
-

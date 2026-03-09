@@ -1,8 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0f0f0f;
-  --foreground: #ffffff;
+  --background: #0b0f17;
+  --foreground: #f5f7fb;
+  --surface-1: #121826;
+  --surface-2: #1a2235;
+  --surface-3: #25314a;
+  --line: #2b3650;
+  --muted: #9aa7c2;
+  --accent: #3b82f6;
+  --accent-strong: #2563eb;
+  --accent-soft: rgba(59, 130, 246, 0.18);
+  --success-soft: rgba(16, 185, 129, 0.18);
 }
 
 @theme inline {
@@ -11,7 +20,10 @@
 }
 
 body {
-  background: var(--background);
+  background:
+    radial-gradient(1200px 450px at 20% -10%, rgba(59, 130, 246, 0.12), transparent 60%),
+    radial-gradient(900px 420px at 90% -20%, rgba(14, 165, 233, 0.1), transparent 58%),
+    var(--background);
   color: var(--foreground);
 }
 
@@ -21,6 +33,45 @@ body {
 
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+.surface-card {
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(26, 34, 53, 0.94), rgba(18, 24, 38, 0.96));
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.32);
+}
+
+.text-muted {
+  color: var(--muted);
+}
+
+.page-title {
+  font-size: clamp(1.4rem, 2vw, 1.9rem);
+  line-height: 1.2;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.section-title {
+  font-size: clamp(1rem, 1.2vw, 1.2rem);
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.reveal-up {
+  animation: reveal-up 240ms ease-out both;
+}
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hide-scrollbar::-webkit-scrollbar {
@@ -42,10 +93,10 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #71717a;
+  background: #4f5d7a;
   border-radius: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #a1a1aa;
+  background: #7b88a3;
 }

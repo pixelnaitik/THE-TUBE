@@ -18,6 +18,8 @@ model User {
   likes         Like[]
   history       WatchHistory[]
   notifications Notification[]
+  watchLater    WatchLater[]
+  progress      VideoProgress[]
   subscribers   Subscription[] @relation("SubscribedTo")
   subscribedTo  Subscription[] @relation("Subscriber")
   playlists     Playlist[]
@@ -40,12 +42,21 @@ model Video {
   comments    Comment[]
   likes       Like[]
   history     WatchHistory[]
+<<<<<<< ours
   playlists   PlaylistVideo[]
   watchLater  WatchLater[]
   createdAt   DateTime        @default(now())
 
   @@index([authorId])
   @@index([status, createdAt])
+=======
+  watchLater  WatchLater[]
+  progress    VideoProgress[]
+  createdAt   DateTime       @default(now())
+
+  @@index([status, createdAt])
+  @@index([authorId, createdAt])
+>>>>>>> theirs
 }
 
 model Comment {
@@ -98,7 +109,11 @@ model WatchHistory {
   watchedAt DateTime @default(now())
 
   @@unique([userId, videoId])
+<<<<<<< ours
   @@index([videoId])
+=======
+  @@index([userId, watchedAt])
+>>>>>>> theirs
 }
 
 model Notification {
@@ -111,6 +126,7 @@ model Notification {
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
 
+<<<<<<< ours
   @@index([userId, createdAt])
 }
 
@@ -136,6 +152,9 @@ model PlaylistVideo {
 
   @@unique([playlistId, videoId])
   @@index([videoId])
+=======
+  @@index([userId, read, createdAt])
+>>>>>>> theirs
 }
 
 model WatchLater {
@@ -144,8 +163,29 @@ model WatchLater {
   user      User     @relation(fields: [userId], references: [id])
   videoId   String
   video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+<<<<<<< ours
   addedAt   DateTime @default(now())
 
   @@unique([userId, videoId])
   @@index([videoId])
+=======
+  createdAt DateTime @default(now())
+
+  @@unique([userId, videoId])
+  @@index([userId, createdAt])
+}
+
+model VideoProgress {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  videoId         String
+  video           Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  positionSeconds Int      @default(0)
+  durationSeconds Int      @default(0)
+  updatedAt       DateTime @updatedAt
+
+  @@unique([userId, videoId])
+  @@index([userId, updatedAt])
+>>>>>>> theirs
 }

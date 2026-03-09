@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { processVideoToHLS } from '@/lib/videoProcessor';
 import fs from 'fs';
 import path from 'path';
 
 // POST /api/reprocess — re-process any stuck PROCESSING or FAILED videos
-export async function POST(req: NextRequest) {
+export async function POST() {
   try {
     const stuckVideos = await prisma.video.findMany({
       where: { status: { in: ['PROCESSING', 'FAILED'] } }

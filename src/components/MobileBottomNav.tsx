@@ -15,19 +15,20 @@ export default function MobileBottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 h-14 bg-[#0f0f0f] border-t border-[#222] z-50 flex items-center justify-around px-2 pb-safe pt-1">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 flex h-16 items-center justify-around border-t border-[var(--line)] bg-[#0b0f17]/95 px-2 pb-safe pt-1 backdrop-blur-md md:hidden">
       {links.map((item) => {
         const isActive = pathname === item.href;
         return (
           <Link
             key={item.href}
             href={item.href}
-            className={`flex flex-col items-center justify-center w-full h-full gap-1 ${
-              isActive ? 'text-white' : 'text-gray-400 hover:text-gray-300'
+            className={`relative flex h-full w-full flex-col items-center justify-center gap-1 rounded-xl transition-colors ${
+              isActive ? 'text-blue-200' : 'text-gray-400 hover:text-gray-200'
             }`}
           >
-            <item.icon className="w-5 h-5 flex-shrink-0" />
-            <span className="text-[10px] font-medium leading-none">{item.label}</span>
+            {isActive && <span className="absolute inset-x-4 top-1 h-0.5 rounded-full bg-[var(--accent)]" />}
+            <item.icon className="h-5 w-5 shrink-0" />
+            <span className="text-[10px] font-semibold leading-none">{item.label}</span>
           </Link>
         );
       })}

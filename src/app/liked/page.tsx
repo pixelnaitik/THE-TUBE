@@ -3,6 +3,7 @@ import { authOptions } from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import VideoCard from '@/components/VideoCard';
+import EmptyState from '@/components/EmptyState';
 import { ThumbsUp } from 'lucide-react';
 
 export default async function LikedPage() {
@@ -22,11 +23,11 @@ export default async function LikedPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-        <ThumbsUp className="w-6 h-6" /> Liked Videos
+      <h1 className="page-title mb-5 flex items-center gap-2 text-white">
+        <ThumbsUp className="h-6 w-6 text-blue-300" /> Liked Videos
       </h1>
       {likes.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {likes.filter(l => l.video.status === 'READY').map(l => (
             <VideoCard
               key={l.id}
@@ -42,7 +43,13 @@ export default async function LikedPage() {
           ))}
         </div>
       ) : (
-        <p className="text-gray-500 text-center py-16">No liked videos yet. Like some videos to see them here!</p>
+        <EmptyState
+          icon={ThumbsUp}
+          title="No liked videos"
+          description="Tap like on any video and it will appear here for easy access later."
+          ctaHref="/"
+          ctaLabel="Find videos"
+        />
       )}
     </div>
   );

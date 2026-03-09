@@ -3,12 +3,13 @@ import { authOptions } from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import VideoCard from '@/components/VideoCard';
+import EmptyState from '@/components/EmptyState';
 import { ListVideo } from 'lucide-react';
 import Link from 'next/link';
 
 export default async function PlaylistPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  
+
   const playlist = await prisma.playlist.findUnique({
     where: { id },
     include: {
@@ -26,51 +27,50 @@ export default async function PlaylistPage({ params }: { params: Promise<{ id: s
   const isOwner = session?.user?.email === playlist.user.email;
 
   const validVideos = playlist.videos.filter(v => v.video.status === 'READY');
-
   const formatDate = (date: Date) => date.toLocaleDateString();
 
   return (
     <div>
-      <div className="flex flex-col md:flex-row gap-6 mb-8 mt-2">
-        <div className="w-full md:w-80 shrink-0 bg-[#1a1a1a] rounded-xl p-6 border border-[#303030] flex flex-col justify-end min-h-[300px] relative overflow-hidden group">
+      <div className="mb-8 mt-2 flex flex-col gap-6 md:flex-row">
+        <aside className="surface-card group relative flex min-h-[300px] w-full shrink-0 flex-col justify-end overflow-hidden rounded-2xl border border-[var(--line)] p-6 md:w-80">
           {validVideos.length > 0 && validVideos[0].video.thumbnail && (
-            <div className="absolute inset-0 z-0 opacity-40 group-hover:opacity-50 transition-opacity">
-              <img src={validVideos[0].video.thumbnail} alt="" className="w-full h-full object-cover blur-md scale-110" />
+            <div className="absolute inset-0 z-0 opacity-40 transition-opacity group-hover:opacity-50">
+              <img src={validVideos[0].video.thumbnail} alt="" className="h-full w-full scale-110 object-cover blur-md" />
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent z-10"></div>
-          
+          <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
+
           <div className="relative z-20">
-            <h1 className="text-3xl font-bold text-white mb-2 leading-tight">{playlist.name}</h1>
-            <p className="text-gray-300 font-medium mb-1">{playlist.user.name}</p>
-            <div className="flex items-center gap-2 text-sm text-gray-400 mb-6">
+            <h1 className="page-title mb-2 text-white leading-tight">{playlist.name}</h1>
+            <p className="mb-1 font-medium text-gray-300">{playlist.user.name}</p>
+            <div className="mb-6 flex items-center gap-2 text-sm text-gray-300">
               <span>{validVideos.length} videos</span>
-              <span>-</span>
+              <span>&middot;</span>
               <span>Updated {new Date(playlist.updatedAt).toLocaleDateString()}</span>
             </div>
-            
+
             {validVideos.length > 0 ? (
-              <Link 
+              <Link
                 href={`/watch/${validVideos[0].video.id}`}
-                className="w-full flex items-center justify-center gap-2 bg-white text-black hover:bg-gray-200 font-semibold py-3 px-4 rounded-full transition-colors"
-               >
-                <ListVideo className="w-5 h-5" /> Play all
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-4 py-3 font-semibold text-black transition-colors hover:bg-gray-200"
+              >
+                <ListVideo className="h-5 w-5" /> Play all
               </Link>
             ) : (
-              <button disabled className="w-full flex items-center justify-center gap-2 bg-[#303030] text-gray-400 font-semibold py-3 px-4 rounded-full cursor-not-allowed">
+              <button disabled className="w-full cursor-not-allowed rounded-full bg-[var(--surface-3)] px-4 py-3 font-semibold text-gray-400">
                 No videos yet
               </button>
             )}
           </div>
-        </div>
+        </aside>
 
-        <div className="flex-1">
+        <section className="flex-1">
           {validVideos.length > 0 ? (
             <div className="flex flex-col gap-3">
               {validVideos.map((item, index) => (
-                <div key={item.id} className="flex items-start gap-4 p-2 hover:bg-[#222] rounded-xl transition-colors group">
-                  <span className="text-gray-500 font-medium w-6 text-center mt-6 hidden sm:block">{index + 1}</span>
-                  <div className="w-40 sm:w-48 shrink-0">
+                <div key={item.id} className="surface-card group flex items-start gap-4 rounded-xl p-2 transition-colors hover:bg-[var(--surface-2)]">
+                  <span className="mt-6 hidden w-6 text-center font-semibold text-muted sm:block">{index + 1}</span>
+                  <div className="w-40 shrink-0 sm:w-48">
                     <VideoCard
                       id={item.video.id}
                       title=""
@@ -82,24 +82,24 @@ export default async function PlaylistPage({ params }: { params: Promise<{ id: s
                       hideDetails
                     />
                   </div>
-                  <div className="flex-1 py-1">
-                    <Link href={`/watch/${item.video.id}`} className="text-white font-medium line-clamp-2 md:text-lg mb-1 group-hover:text-blue-400 transition-colors">
+                  <div className="min-w-0 flex-1 py-1">
+                    <Link href={`/watch/${item.video.id}`} className="mb-1 line-clamp-2 text-base font-semibold text-white transition-colors group-hover:text-blue-300 md:text-lg">
                       {item.video.title}
                     </Link>
-                    <p className="text-sm text-gray-400 mb-1">{item.video.author.name}</p>
-                    <p className="text-xs text-gray-500">{item.video.views} views - {formatDate(item.video.createdAt)}</p>
+                    <p className="mb-1 text-sm text-muted">{item.video.author.name}</p>
+                    <p className="text-xs text-muted">{item.video.views} views <span className="mx-1">&middot;</span> {formatDate(item.video.createdAt)}</p>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center h-full text-center py-16 text-gray-500">
-              <ListVideo className="w-16 h-16 mb-4 opacity-20" />
-              <h2 className="text-xl font-medium text-gray-300 mb-2">This playlist is empty</h2>
-              {isOwner && <p>Find videos you like and save them to this playlist.</p>}
-            </div>
+            <EmptyState
+              icon={ListVideo}
+              title="This playlist is empty"
+              description={isOwner ? 'Find videos you like and save them to this playlist.' : 'No videos have been added to this playlist yet.'}
+            />
           )}
-        </div>
+        </section>
       </div>
     </div>
   );

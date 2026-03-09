@@ -5,6 +5,21 @@ import { prisma } from '@/lib/prisma';
 import fs from 'fs';
 import path from 'path';
 import { processVideoToHLS } from '@/lib/videoProcessor';
+import { z } from 'zod';
+
+const MAX_VIDEO_SIZE_BYTES = 500 * 1024 * 1024;
+const ALLOWED_VIDEO_MIME_TYPES = new Set([
+  'video/mp4',
+  'video/quicktime',
+  'video/webm',
+  'video/x-matroska',
+]);
+
+const uploadMetaSchema = z.object({
+  title: z.string().trim().min(1).max(120),
+  description: z.string().max(5000).optional(),
+  tags: z.string().max(500).optional(),
+});
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,13 +30,30 @@ export async function POST(req: NextRequest) {
 
     const formData = await req.formData();
     const file = (formData.get('video') || formData.get('file')) as File | null;
-    const title = formData.get('title') as string;
-    const description = formData.get('description') as string;
-    const tags = formData.get('tags') as string;
+    const rawTitle = (formData.get('title') as string) || '';
+    const rawDescription = (formData.get('description') as string) || '';
+    const rawTags = (formData.get('tags') as string) || '';
 
-    if (!file || !title) {
+    if (!file) {
       return NextResponse.json({ error: "File and title are required" }, { status: 400 });
     }
+
+    if (!ALLOWED_VIDEO_MIME_TYPES.has(file.type)) {
+      return NextResponse.json({ error: 'Unsupported file type' }, { status: 400 });
+    }
+    if (file.size > MAX_VIDEO_SIZE_BYTES) {
+      return NextResponse.json({ error: `File exceeds ${MAX_VIDEO_SIZE_BYTES / (1024 * 1024)}MB limit` }, { status: 400 });
+    }
+
+    const parsedMeta = uploadMetaSchema.safeParse({
+      title: rawTitle,
+      description: rawDescription || undefined,
+      tags: rawTags || undefined,
+    });
+    if (!parsedMeta.success) {
+      return NextResponse.json({ error: parsedMeta.error.issues[0]?.message || 'Invalid metadata' }, { status: 400 });
+    }
+    const { title, description, tags } = parsedMeta.data;
 
     const user = await prisma.user.findUnique({ where: { email: session.user.email } });
     if (!user) {

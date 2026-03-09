@@ -4,9 +4,10 @@ import { authOptions } from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
 import fs from 'fs';
 import path from 'path';
+import { videoUpdateSchema } from '@/lib/validation';
 
 // DELETE /api/videos/[id] — Delete a video (only by author)
-export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -41,7 +42,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   if (!video) return NextResponse.json({ error: 'Video not found' }, { status: 404 });
   if (video.authorId !== user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
-  const { title, description, tags } = await req.json();
+  const parsed = videoUpdateSchema.safeParse(await req.json());
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues[0]?.message || 'Invalid video metadata' }, { status: 400 });
+  }
+  const { title, description, tags } = parsed.data;
   const updated = await prisma.video.update({
     where: { id },
     data: {

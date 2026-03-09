@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
 import VideoCard from "@/components/VideoCard";
+import EmptyState from "@/components/EmptyState";
 import { Search } from "lucide-react";
 
 interface Video {
@@ -41,17 +42,17 @@ function SearchResults() {
 
   return (
     <>
-      <h1 className="mb-6 flex items-center gap-2 text-xl font-semibold text-white">
-        <Search className="h-5 w-5" />
+      <h1 className="page-title mb-5 flex items-center gap-2 text-white">
+        <Search className="h-6 w-6 text-blue-300" />
         Search results for &quot;{query}&quot;
       </h1>
 
       {loading ? (
-        <div className="flex justify-center py-12">
+        <div className="surface-card flex justify-center rounded-2xl py-12">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
         </div>
       ) : result.videos.length > 0 ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {result.videos.map(video => (
             <VideoCard
               key={video.id}
@@ -67,11 +68,11 @@ function SearchResults() {
           ))}
         </div>
       ) : (
-        <div className="py-16 text-center">
-          <Search className="mx-auto mb-4 h-16 w-16 text-gray-600" />
-          <p className="text-lg text-gray-400">No videos found for &quot;{query}&quot;</p>
-          <p className="mt-1 text-sm text-gray-500">Try different keywords or check your spelling</p>
-        </div>
+        <EmptyState
+          icon={Search}
+          title="No results found"
+          description="Try a different keyword, shorten your phrase, or check spelling."
+        />
       )}
     </>
   );
@@ -81,7 +82,7 @@ export default function SearchPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex justify-center py-12">
+        <div className="surface-card flex justify-center rounded-2xl py-12">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
         </div>
       }

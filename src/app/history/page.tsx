@@ -3,6 +3,7 @@ import { authOptions } from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import VideoCard from '@/components/VideoCard';
+import EmptyState from '@/components/EmptyState';
 import { Clock } from 'lucide-react';
 
 export default async function HistoryPage() {
@@ -23,11 +24,11 @@ export default async function HistoryPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-        <Clock className="w-6 h-6" /> Watch History
+      <h1 className="page-title mb-5 flex items-center gap-2 text-white">
+        <Clock className="h-6 w-6 text-blue-300" /> Watch History
       </h1>
       {history.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {history.filter(h => h.video.status === 'READY').map(h => (
             <VideoCard
               key={h.id}
@@ -43,7 +44,13 @@ export default async function HistoryPage() {
           ))}
         </div>
       ) : (
-        <p className="text-gray-500 text-center py-16">No watch history yet. Start watching videos!</p>
+        <EmptyState
+          icon={Clock}
+          title="No watch history"
+          description="Start watching videos and we will keep track of them here for quick revisit."
+          ctaHref="/"
+          ctaLabel="Start watching"
+        />
       )}
     </div>
   );

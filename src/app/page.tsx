@@ -1,6 +1,8 @@
 import VideoCard from '@/components/VideoCard';
 import { prisma } from '@/lib/prisma';
 import HomeFilters from '@/components/HomeFilters';
+import EmptyState from '@/components/EmptyState';
+import { Video } from 'lucide-react';
 
 interface HomeProps {
   searchParams: Promise<{ sort?: string; tag?: string }>;
@@ -37,7 +39,7 @@ export default async function Home({ searchParams }: HomeProps) {
       <HomeFilters currentSort={sort} currentTag={tag || 'All'} />
 
       {videos.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-4">
+        <div className="mt-4 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {videos.map(video => (
             <VideoCard
               key={video.id}
@@ -53,9 +55,14 @@ export default async function Home({ searchParams }: HomeProps) {
           ))}
         </div>
       ) : (
-        <div className="text-center py-20">
-          <p className="text-gray-400 text-lg">No videos available yet.</p>
-          <p className="text-gray-500 text-sm mt-1">Sign in and upload a video to see it here!</p>
+        <div className="mt-6">
+          <EmptyState
+            icon={Video}
+            title="No videos yet"
+            description="Your feed is empty right now. Upload your first video to start building your library."
+            ctaHref="/upload"
+            ctaLabel="Upload your first video"
+          />
         </div>
       )}
     </>

@@ -1,6 +1,8 @@
 "use client";
 
+
 import { useState, useRef } from "react";
+
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Upload, X, FileVideo } from "lucide-react";
@@ -17,6 +19,8 @@ export default function UploadPage() {
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState("");
   const [dragOver, setDragOver] = useState(false);
+
+
 
   const handleFile = (f: File) => {
     if (!f.type.startsWith("video/")) {
@@ -35,8 +39,10 @@ export default function UploadPage() {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
+
     const f = e.dataTransfer.files[0];
     if (f) handleFile(f);
+
   };
 
   const handleUpload = async () => {
@@ -52,11 +58,9 @@ export default function UploadPage() {
 
     const xhr = new XMLHttpRequest();
     xhr.open('POST', '/api/upload');
-
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) setProgress(Math.round((e.loaded / e.total) * 100));
     };
-
     xhr.onload = () => {
       if (xhr.status === 200) {
         const data = JSON.parse(xhr.responseText);
@@ -67,15 +71,20 @@ export default function UploadPage() {
       }
     };
 
+
+
     xhr.onerror = () => {
       setError("Upload failed. Please try again.");
       setUploading(false);
     };
 
+
+
     xhr.send(formData);
   };
 
   if (status === "loading") return null;
+
   if (!session) {
     router.push("/login");
     return null;
@@ -182,6 +191,7 @@ export default function UploadPage() {
             className="w-full rounded-lg bg-blue-600 py-3 font-semibold text-white transition-colors hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {uploading ? `Uploading (${progress}%)...` : 'Upload Video'}
+
           </button>
         </div>
       )}
