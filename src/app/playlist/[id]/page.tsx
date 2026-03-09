@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 import { prisma } from '@/lib/prisma';
-import { redirect, notFound } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import VideoCard from '@/components/VideoCard';
 import { ListVideo } from 'lucide-react';
 import Link from 'next/link';
@@ -27,12 +27,7 @@ export default async function PlaylistPage({ params }: { params: Promise<{ id: s
 
   const validVideos = playlist.videos.filter(v => v.video.status === 'READY');
 
-  const timeAgo = (date: Date) => {
-    const s = Math.floor((Date.now() - date.getTime()) / 1000);
-    if (s < 3600) return `${Math.floor(s / 60)}m ago`;
-    if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
-    return `${Math.floor(s / 86400)}d ago`;
-  };
+  const formatDate = (date: Date) => date.toLocaleDateString();
 
   return (
     <div>
@@ -50,7 +45,7 @@ export default async function PlaylistPage({ params }: { params: Promise<{ id: s
             <p className="text-gray-300 font-medium mb-1">{playlist.user.name}</p>
             <div className="flex items-center gap-2 text-sm text-gray-400 mb-6">
               <span>{validVideos.length} videos</span>
-              <span>•</span>
+              <span>-</span>
               <span>Updated {new Date(playlist.updatedAt).toLocaleDateString()}</span>
             </div>
             
@@ -92,7 +87,7 @@ export default async function PlaylistPage({ params }: { params: Promise<{ id: s
                       {item.video.title}
                     </Link>
                     <p className="text-sm text-gray-400 mb-1">{item.video.author.name}</p>
-                    <p className="text-xs text-gray-500">{item.video.views} views • {timeAgo(item.video.createdAt)}</p>
+                    <p className="text-xs text-gray-500">{item.video.views} views - {formatDate(item.video.createdAt)}</p>
                   </div>
                 </div>
               ))}

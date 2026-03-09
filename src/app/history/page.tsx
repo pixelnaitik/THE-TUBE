@@ -19,12 +19,7 @@ export default async function HistoryPage() {
     take: 50
   });
 
-  const timeAgo = (date: Date) => {
-    const s = Math.floor((Date.now() - date.getTime()) / 1000);
-    if (s < 3600) return `${Math.floor(s / 60)}m ago`;
-    if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
-    return `${Math.floor(s / 86400)}d ago`;
-  };
+  const formatDate = (date: Date) => date.toLocaleDateString();
 
   return (
     <div>
@@ -42,7 +37,7 @@ export default async function HistoryPage() {
               channelName={h.video.author.name || 'Creator'}
               channelAvatar={h.video.author.image || `https://api.dicebear.com/7.x/initials/svg?seed=${h.video.author.name}`}
               views={`${h.video.views} views`}
-              timestamp={timeAgo(h.watchedAt)}
+              timestamp={formatDate(h.watchedAt)}
               duration={h.video.duration ? `${Math.floor(h.video.duration / 60)}:${String(h.video.duration % 60).padStart(2, '0')}` : '0:00'}
             />
           ))}

@@ -1,14 +1,19 @@
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import VideoPlayer from '@/components/VideoPlayer';
 import LikeButtons from '@/components/LikeButtons';
-import CommentSection from '@/components/CommentSection';
 import ViewCounter from '@/components/ViewCounter';
 import VideoActions from '@/components/VideoActions';
 import SubscribeButton from '@/components/SubscribeButton';
 import Link from 'next/link';
 import { UserCircle2 } from 'lucide-react';
 import VideoDescription from '@/components/VideoDescription';
+
+const CommentSection = dynamic(() => import('@/components/CommentSection'), {
+  ssr: false,
+  loading: () => <div className="mt-6 h-24 animate-pulse rounded-xl bg-[#1a1a1a]" />,
+});
 
 interface WatchPageProps {
   params: Promise<{ id: string }>;
@@ -51,13 +56,13 @@ export default async function WatchPage({ params }: WatchPageProps) {
       <ViewCounter videoId={video.id} />
 
       <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-4 pt-3 md:gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 min-w-0">
           {video.status === 'READY' && video.hlsUrl ? (
             <VideoPlayer src={video.hlsUrl} />
           ) : (
             <div className="flex aspect-video w-full items-center justify-center rounded-xl bg-[#1a1a1a]">
               <div className="text-center">
-                <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
+                <div className="mx-auto mb-4 h-16 w-16 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
                 <p className="text-lg text-gray-400">Video is processing...</p>
               </div>
             </div>
@@ -70,7 +75,7 @@ export default async function WatchPage({ params }: WatchPageProps) {
               <Link href={`/channel/${video.authorId}`}>
                 <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-[#303030]">
                   {video.author.image ? (
-                    <img src={video.author.image} alt="" className="h-full w-full object-cover" />
+                    <img src={video.author.image} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" />
                   ) : (
                     <UserCircle2 className="h-7 w-7 text-gray-400" />
                   )}
@@ -106,14 +111,22 @@ export default async function WatchPage({ params }: WatchPageProps) {
           <CommentSection videoId={video.id} />
         </div>
 
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 min-w-0">
           <h3 className="mb-3 text-base font-semibold text-white">Up next</h3>
           {recommended.length > 0 ? (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1 landscape:sm:grid-cols-3 landscape:lg:grid-cols-1">
               {recommended.map(v => (
-                <Link key={v.id} href={`/watch/${v.id}`} className="group flex gap-2">
+                <Link key={v.id} href={`/watch/${v.id}`} className="group flex gap-2 min-w-0">
                   <div className="h-20 w-32 shrink-0 overflow-hidden rounded-lg bg-[#1a1a1a] sm:h-24 sm:w-40 lg:w-36 xl:w-40">
-                    <img src={v.thumbnail || `https://picsum.photos/seed/${v.id}/320/180`} alt="" className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+                    <img
+                      src={v.thumbnail || `https://picsum.photos/seed/${v.id}/320/180`}
+                      alt=""
+                      width={320}
+                      height={180}
+                      loading="lazy"
+                      decoding="async"
+                      className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                    />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="line-clamp-2 text-sm font-medium text-white">{v.title}</p>
@@ -131,4 +144,3 @@ export default async function WatchPage({ params }: WatchPageProps) {
     </>
   );
 }
-

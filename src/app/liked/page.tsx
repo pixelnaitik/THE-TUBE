@@ -18,12 +18,7 @@ export default async function LikedPage() {
     orderBy: { id: 'desc' }
   });
 
-  const timeAgo = (date: Date) => {
-    const s = Math.floor((Date.now() - date.getTime()) / 1000);
-    if (s < 3600) return `${Math.floor(s / 60)}m ago`;
-    if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
-    return `${Math.floor(s / 86400)}d ago`;
-  };
+  const formatDate = (date: Date) => date.toLocaleDateString();
 
   return (
     <div>
@@ -41,7 +36,7 @@ export default async function LikedPage() {
               channelName={l.video.author.name || 'Creator'}
               channelAvatar={l.video.author.image || `https://api.dicebear.com/7.x/initials/svg?seed=${l.video.author.name}`}
               views={`${l.video.views} views`}
-              timestamp={timeAgo(l.video.createdAt)}
+              timestamp={formatDate(l.video.createdAt)}
               duration={l.video.duration ? `${Math.floor(l.video.duration / 60)}:${String(l.video.duration % 60).padStart(2, '0')}` : '0:00'}
             />
           ))}

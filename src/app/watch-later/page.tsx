@@ -18,12 +18,7 @@ export default async function WatchLaterPage() {
     orderBy: { addedAt: 'desc' }
   });
 
-  const timeAgo = (date: Date) => {
-    const s = Math.floor((Date.now() - date.getTime()) / 1000);
-    if (s < 3600) return `${Math.floor(s / 60)}m ago`;
-    if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
-    return `${Math.floor(s / 86400)}d ago`;
-  };
+  const formatDate = (date: Date) => date.toLocaleDateString();
 
   return (
     <div>
@@ -41,7 +36,7 @@ export default async function WatchLaterPage() {
               channelName={item.video.author.name || 'Creator'}
               channelAvatar={item.video.author.image || `https://api.dicebear.com/7.x/initials/svg?seed=${item.video.author.name}`}
               views={`${item.video.views} views`}
-              timestamp={timeAgo(item.video.createdAt)}
+              timestamp={formatDate(item.video.createdAt)}
               duration={item.video.duration ? `${Math.floor(item.video.duration / 60)}:${String(item.video.duration % 60).padStart(2, '0')}` : '0:00'}
             />
           ))}

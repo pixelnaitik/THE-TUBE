@@ -59,7 +59,7 @@ export default function Navbar() {
   };
 
   const timeAgo = (dateStr: string) => {
-    const s = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+    const s = Math.floor((new Date().getTime() - new Date(dateStr).getTime()) / 1000);
     if (s < 60) return 'now';
     if (s < 3600) return `${Math.floor(s / 60)}m`;
     if (s < 86400) return `${Math.floor(s / 3600)}h`;
@@ -67,15 +67,16 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 flex h-14 items-center justify-between border-b border-[#222] bg-[#0f0f0f] px-2 sm:px-4">
-      <div className="flex items-center gap-1.5 sm:gap-4">
+    <nav className="fixed top-0 left-0 right-0 z-50 flex h-14 items-center justify-between border-b border-[#222] bg-[#0f0f0f] px-2 pt-safe sm:px-4">
+      <div className="min-w-0 flex items-center gap-1.5 sm:gap-4">
         <button
+          aria-label="Toggle sidebar"
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="rounded-full p-2 transition-colors hover:bg-[#272727]"
         >
           <Menu className="h-5 w-5 text-white" />
         </button>
-        <Link href="/" className="flex items-center gap-1 sm:gap-2">
+        <Link href="/" className="min-w-0 flex items-center gap-1 sm:gap-2">
           <div className="rounded-lg bg-red-600 p-1 text-white">
             <Video className="h-5 w-5 fill-current" />
           </div>
@@ -92,7 +93,7 @@ export default function Navbar() {
             placeholder="Search"
             className="w-full rounded-l-full border border-[#303030] bg-[#121212] px-4 py-2 text-white outline-none transition-colors placeholder:text-gray-500 focus:border-blue-500"
           />
-          <button type="submit" className="rounded-r-full border border-[#303030] border-l-0 bg-[#222] px-5 transition-colors hover:bg-[#303030]">
+          <button type="submit" aria-label="Search" className="rounded-r-full border border-[#303030] border-l-0 bg-[#222] px-5 transition-colors hover:bg-[#303030]">
             <Search className="h-5 w-5 text-white" />
           </button>
         </div>
@@ -100,6 +101,7 @@ export default function Navbar() {
 
       <div className="flex items-center gap-0.5 sm:gap-1.5">
         <button
+          aria-label="Open search"
           onClick={() => setShowMobileSearch(true)}
           className="rounded-full p-2 text-white transition-colors hover:bg-[#272727] md:hidden"
         >
@@ -115,7 +117,11 @@ export default function Navbar() {
 
             <div className="relative" ref={notifRef}>
               <button
-                onClick={() => { setShowNotifs(!showNotifs); if (!showNotifs) markAllRead(); }}
+                aria-label="Notifications"
+                onClick={() => {
+                  setShowNotifs(!showNotifs);
+                  if (!showNotifs) markAllRead();
+                }}
                 className="relative rounded-full p-2 transition-colors hover:bg-[#272727]"
               >
                 <Bell className="h-5 w-5 text-white" />
@@ -150,6 +156,7 @@ export default function Navbar() {
 
             <div className="relative" ref={userMenuRef}>
               <button
+                aria-label="User menu"
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="ml-1 flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-purple-600 text-sm font-medium text-white transition-all hover:ring-2 hover:ring-purple-400"
               >
@@ -203,6 +210,7 @@ export default function Navbar() {
       {showMobileSearch && (
         <div className="absolute inset-0 z-50 flex items-center bg-[#0f0f0f] px-2 md:hidden">
           <button
+            aria-label="Close search"
             onClick={() => setShowMobileSearch(false)}
             className="mr-2 shrink-0 rounded-full p-2 text-white transition-colors hover:bg-[#272727]"
           >
@@ -217,7 +225,7 @@ export default function Navbar() {
               placeholder="Search"
               className="w-full rounded-l-full border border-[#303030] bg-[#121212] px-4 py-2 text-white outline-none transition-colors placeholder:text-gray-500 focus:border-blue-500"
             />
-            <button type="submit" className="shrink-0 rounded-r-full border border-[#303030] border-l-0 bg-[#222] px-4 transition-colors hover:bg-[#303030]">
+            <button type="submit" aria-label="Search" className="shrink-0 rounded-r-full border border-[#303030] border-l-0 bg-[#222] px-4 transition-colors hover:bg-[#303030]">
               <Search className="h-4 w-4 text-white" />
             </button>
           </form>
@@ -226,4 +234,3 @@ export default function Navbar() {
     </nav>
   );
 }
-

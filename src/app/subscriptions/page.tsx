@@ -30,12 +30,7 @@ export default async function SubscriptionsPage() {
     .flatMap(sub => sub.channel.videos.map(v => ({ ...v, author: sub.channel })))
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-  const timeAgo = (date: Date) => {
-    const s = Math.floor((Date.now() - date.getTime()) / 1000);
-    if (s < 3600) return `${Math.floor(s / 60)}m ago`;
-    if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
-    return `${Math.floor(s / 86400)}d ago`;
-  };
+  const formatDate = (date: Date) => date.toLocaleDateString();
 
   return (
     <div>
@@ -53,7 +48,7 @@ export default async function SubscriptionsPage() {
               channelName={video.author.name || 'Creator'}
               channelAvatar={video.author.image || `https://api.dicebear.com/7.x/initials/svg?seed=${video.author.name}`}
               views={`${video.views} views`}
-              timestamp={timeAgo(video.createdAt)}
+              timestamp={formatDate(video.createdAt)}
               duration={video.duration ? `${Math.floor(video.duration / 60)}:${String(video.duration % 60).padStart(2, '0')}` : '0:00'}
             />
           ))}

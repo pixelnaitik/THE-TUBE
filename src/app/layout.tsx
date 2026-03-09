@@ -33,7 +33,7 @@ export default function RootLayout({
           <Navbar />
           <div className="mt-14 flex h-[calc(100dvh-56px)] pb-14 md:pb-0">
             <Sidebar />
-            <main className="flex-1 overflow-y-auto bg-[#0f0f0f] p-3 sm:p-5 md:ml-56 lg:p-8 transition-colors duration-200">
+            <main className="flex-1 overflow-y-auto bg-[#0f0f0f] p-3 sm:p-5 md:ml-20 lg:ml-56 lg:p-8 transition-colors duration-200">
               {children}
             </main>
           </div>
@@ -44,5 +44,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-

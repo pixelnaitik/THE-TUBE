@@ -18,20 +18,22 @@ interface Video {
 function SearchResults() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q") || "";
-  const [videos, setVideos] = useState<Video[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [result, setResult] = useState<{ query: string; videos: Video[] }>({ query: "", videos: [] });
 
   useEffect(() => {
-    if (query) {
-      setLoading(true);
-      fetch(`/api/search?q=${encodeURIComponent(query)}`)
-        .then(r => r.json())
-        .then(data => { setVideos(data); setLoading(false); });
-    }
+    if (!query) return;
+
+    fetch(`/api/search?q=${encodeURIComponent(query)}`)
+      .then(r => r.json())
+      .then((data: Video[]) => {
+        setResult({ query, videos: data });
+      });
   }, [query]);
 
+  const loading = Boolean(query) && result.query !== query;
+
   const timeAgo = (dateStr: string) => {
-    const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+    const seconds = Math.floor((new Date().getTime() - new Date(dateStr).getTime()) / 1000);
     if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
     if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
     return `${Math.floor(seconds / 86400)} days ago`;
@@ -39,18 +41,18 @@ function SearchResults() {
 
   return (
     <>
-      <h1 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-        <Search className="w-5 h-5" />
+      <h1 className="mb-6 flex items-center gap-2 text-xl font-semibold text-white">
+        <Search className="h-5 w-5" />
         Search results for &quot;{query}&quot;
       </h1>
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
         </div>
-      ) : videos.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {videos.map(video => (
+      ) : result.videos.length > 0 ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {result.videos.map(video => (
             <VideoCard
               key={video.id}
               id={video.id}
@@ -65,10 +67,10 @@ function SearchResults() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-16">
-          <Search className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-          <p className="text-gray-400 text-lg">No videos found for &quot;{query}&quot;</p>
-          <p className="text-gray-500 text-sm mt-1">Try different keywords or check your spelling</p>
+        <div className="py-16 text-center">
+          <Search className="mx-auto mb-4 h-16 w-16 text-gray-600" />
+          <p className="text-lg text-gray-400">No videos found for &quot;{query}&quot;</p>
+          <p className="mt-1 text-sm text-gray-500">Try different keywords or check your spelling</p>
         </div>
       )}
     </>
@@ -77,11 +79,13 @@ function SearchResults() {
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={
-      <div className="flex justify-center py-12">
-        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex justify-center py-12">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+        </div>
+      }
+    >
       <SearchResults />
     </Suspense>
   );
