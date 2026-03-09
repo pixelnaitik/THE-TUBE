@@ -70,8 +70,8 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-8">
-      <h1 className="text-2xl font-bold text-white mb-6">Upload Video</h1>
+    <div className="mx-auto max-w-2xl py-4 sm:py-8">
+      <h1 className="mb-4 text-2xl font-bold text-white sm:mb-6">Upload Video</h1>
 
       {!file ? (
         <div
@@ -79,7 +79,7 @@ export default function UploadPage() {
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
-          className={`border-2 border-dashed rounded-xl p-16 text-center cursor-pointer transition-colors ${
+          className={`cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-colors sm:p-16 ${
             dragOver ? 'border-blue-500 bg-blue-500/5' : 'border-[#303030] hover:border-[#505050]'
           }`}
         >
@@ -167,3 +167,5 @@ export default function UploadPage() {
     </div>
   );
 }
+
+

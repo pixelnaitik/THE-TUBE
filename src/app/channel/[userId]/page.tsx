@@ -33,11 +33,11 @@ export default async function ChannelPage({ params }: ChannelPageProps) {
   return (
     <div>
       {/* Channel Banner */}
-      <div className="h-32 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-xl mb-6"></div>
+      <div className="mb-4 h-24 rounded-xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 sm:mb-6 sm:h-32"></div>
 
       {/* Channel Info */}
-      <div className="flex items-start gap-4 mb-8">
-        <div className="w-20 h-20 rounded-full bg-[#303030] flex items-center justify-center overflow-hidden shrink-0">
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start">
+        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#303030] sm:h-20 sm:w-20">
           {channel.image ? (
             <img src={channel.image} alt="" className="w-full h-full object-cover" />
           ) : (
@@ -45,9 +45,9 @@ export default async function ChannelPage({ params }: ChannelPageProps) {
           )}
         </div>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-white">{channel.name || 'Creator'}</h1>
+          <h1 className="text-xl font-bold text-white sm:text-2xl">{channel.name || 'Creator'}</h1>
           <p className="text-sm text-gray-400 mt-1">
-            {subscriberCount} subscriber{subscriberCount !== 1 ? 's' : ''} · {channel.videos.length} video{channel.videos.length !== 1 ? 's' : ''}
+            {subscriberCount} subscriber{subscriberCount !== 1 ? 's' : ''} - {channel.videos.length} video{channel.videos.length !== 1 ? 's' : ''}
           </p>
           <div className="mt-3">
             <SubscribeButton channelId={channel.id} />
@@ -79,3 +79,5 @@ export default async function ChannelPage({ params }: ChannelPageProps) {
     </div>
   );
 }
+
+

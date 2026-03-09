@@ -20,25 +20,32 @@ model User {
   notifications Notification[]
   subscribers   Subscription[] @relation("SubscribedTo")
   subscribedTo  Subscription[] @relation("Subscriber")
+  playlists     Playlist[]
+  watchLater    WatchLater[]
   createdAt     DateTime       @default(now())
 }
 
 model Video {
-  id          String         @id @default(cuid())
+  id          String          @id @default(cuid())
   title       String
   description String?
   thumbnail   String?
   hlsUrl      String?
-  status      String         @default("PROCESSING")
+  status      String          @default("PROCESSING")
   duration    Int?
-  views       Int            @default(0)
-  tags        String?        // Comma-separated tags
+  views       Int             @default(0)
+  tags        String?         // Comma-separated tags
   authorId    String
-  author      User           @relation(fields: [authorId], references: [id])
+  author      User            @relation(fields: [authorId], references: [id])
   comments    Comment[]
   likes       Like[]
   history     WatchHistory[]
-  createdAt   DateTime       @default(now())
+  playlists   PlaylistVideo[]
+  watchLater  WatchLater[]
+  createdAt   DateTime        @default(now())
+
+  @@index([authorId])
+  @@index([status, createdAt])
 }
 
 model Comment {
@@ -52,6 +59,10 @@ model Comment {
   parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
   replies   Comment[] @relation("CommentReplies")
   createdAt DateTime  @default(now())
+
+  @@index([videoId])
+  @@index([userId])
+  @@index([parentId])
 }
 
 model Like {
@@ -63,6 +74,7 @@ model Like {
   user    User   @relation(fields: [userId], references: [id])
 
   @@unique([videoId, userId])
+  @@index([userId])
 }
 
 model Subscription {
@@ -74,6 +86,7 @@ model Subscription {
   createdAt    DateTime @default(now())
 
   @@unique([subscriberId, channelId])
+  @@index([channelId])
 }
 
 model WatchHistory {
@@ -85,6 +98,7 @@ model WatchHistory {
   watchedAt DateTime @default(now())
 
   @@unique([userId, videoId])
+  @@index([videoId])
 }
 
 model Notification {
@@ -96,4 +110,42 @@ model Notification {
   link      String?
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model Playlist {
+  id        String          @id @default(cuid())
+  name      String
+  userId    String
+  user      User            @relation(fields: [userId], references: [id])
+  videos    PlaylistVideo[]
+  createdAt DateTime        @default(now())
+
+  @@index([userId])
+}
+
+model PlaylistVideo {
+  id         String   @id @default(cuid())
+  playlistId String
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  videoId    String
+  video      Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  order      Int
+  addedAt    DateTime @default(now())
+
+  @@unique([playlistId, videoId])
+  @@index([videoId])
+}
+
+model WatchLater {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  videoId   String
+  video     Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  addedAt   DateTime @default(now())
+
+  @@unique([userId, videoId])
+  @@index([videoId])
 }

@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Share2, MoreHorizontal, Pencil, Trash2, PictureInPicture2, Check, X } from "lucide-react";
+import { Share2, MoreHorizontal, Pencil, Trash2, Check, X, Bookmark, BookmarkCheck, PlusCircle } from "lucide-react";
+import toast from "react-hot-toast";
+import PlaylistModal from "./PlaylistModal";
 
 interface VideoActionsProps {
   videoId: string;
@@ -22,69 +24,149 @@ export default function VideoActions({ videoId, authorId, title, description, ta
   const [editDesc, setEditDesc] = useState(description);
   const [editTags, setEditTags] = useState(tags);
   const [copied, setCopied] = useState(false);
+  const [savedToWatchLater, setSavedToWatchLater] = useState(false);
+  const [showPlaylistModal, setShowPlaylistModal] = useState(false);
 
-  const isAuthor = session?.user?.email; // We'll check on server side
+  const isAuthor = session?.user?.email;
+
+  // Check watch later status
+  useEffect(() => {
+    if (session) {
+      fetch('/api/watch-later')
+        .then(res => res.json())
+        .then(data => {
+          if (data.watchLaterList?.includes(videoId)) {
+            setSavedToWatchLater(true);
+          }
+        });
+    }
+  }, [session, videoId]);
+
+  const handleToggleWatchLater = async () => {
+    if (!session) {
+      toast.error('Sign in to save videos');
+      return router.push('/login');
+    }
+
+    // Optimistic UI update
+    setSavedToWatchLater(!savedToWatchLater);
+    const prev = savedToWatchLater;
+
+    try {
+      const res = await fetch('/api/watch-later', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoId })
+      });
+      const data = await res.json();
+      setSavedToWatchLater(data.watchLater);
+      toast.success(data.watchLater ? 'Saved to Watch Later' : 'Removed from Watch Later');
+    } catch {
+      setSavedToWatchLater(prev); // Revert on failure
+      toast.error('Failed to update Watch Later');
+    }
+  };
 
   const handleShare = async () => {
     const url = window.location.href;
     await navigator.clipboard.writeText(url);
     setCopied(true);
+    toast.success('Link copied to clipboard!');
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this video?')) return;
+    const toastId = toast.loading('Deleting video...');
     const res = await fetch(`/api/videos/${videoId}`, { method: 'DELETE' });
-    if (res.ok) router.push('/');
+    if (res.ok) {
+      toast.success('Video deleted', { id: toastId });
+      router.push('/');
+    } else {
+      toast.error('Failed to delete video', { id: toastId });
+    }
   };
 
   const handleSaveEdit = async () => {
-    await fetch(`/api/videos/${videoId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title: editTitle, description: editDesc, tags: editTags })
-    });
-    setEditing(false);
-    router.refresh();
+    const toastId = toast.loading('Saving changes...');
+    try {
+      await fetch(`/api/videos/${videoId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: editTitle, description: editDesc, tags: editTags })
+      });
+      setEditing(false);
+      toast.success('Changes saved', { id: toastId });
+      router.refresh();
+    } catch {
+      toast.error('Failed to save changes', { id: toastId });
+    }
   };
 
   return (
     <>
-      {/* Share Button */}
-      <button
-        onClick={handleShare}
-        className="flex items-center gap-2 px-4 py-2 bg-[#222222] hover:bg-[#303030] rounded-full text-white text-sm transition-colors"
-      >
-        {copied ? <Check className="w-4 h-4 text-green-400" /> : <Share2 className="w-4 h-4" />}
-        {copied ? 'Copied!' : 'Share'}
-      </button>
-
-      {/* More Menu */}
-      <div className="relative">
+      <div className="flex items-center gap-2 flex-wrap">
+        {/* Save to Watch Later */}
         <button
-          onClick={() => setShowMenu(!showMenu)}
-          className="p-2 bg-[#222222] hover:bg-[#303030] rounded-full text-white transition-colors"
+          onClick={handleToggleWatchLater}
+          className={`flex items-center gap-2 px-4 py-2.5 md:py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+            savedToWatchLater ? 'bg-blue-600/20 text-blue-400 hover:bg-blue-600/30' : 'bg-[#222222] hover:bg-[#303030] text-white'
+          }`}
         >
-          <MoreHorizontal className="w-5 h-5" />
+          {savedToWatchLater ? <BookmarkCheck className="w-4 h-4 fill-current" /> : <Bookmark className="w-4 h-4" />}
+          {savedToWatchLater ? 'Saved' : 'Save'}
         </button>
 
-        {showMenu && (
-          <div className="absolute right-0 top-full mt-2 w-48 bg-[#1a1a1a] border border-[#303030] rounded-xl overflow-hidden shadow-2xl z-10">
-            <button
-              onClick={() => { setEditing(true); setShowMenu(false); }}
-              className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#272727] text-white text-sm transition-colors"
-            >
-              <Pencil className="w-4 h-4" /> Edit video
-            </button>
-            <button
-              onClick={() => { handleDelete(); setShowMenu(false); }}
-              className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-[#272727] text-red-400 text-sm transition-colors"
-            >
-              <Trash2 className="w-4 h-4" /> Delete video
-            </button>
-          </div>
-        )}
+        {/* Share Button */}
+        <button
+          onClick={handleShare}
+          className="flex items-center gap-2 px-4 py-2.5 md:py-2 bg-[#222222] hover:bg-[#303030] rounded-full text-white text-sm font-medium whitespace-nowrap transition-colors"
+        >
+          {copied ? <Check className="w-4 h-4 text-green-400" /> : <Share2 className="w-4 h-4" />}
+          Share
+        </button>
+
+        {/* More Menu */}
+        <div className="relative">
+          <button
+            onClick={() => setShowMenu(!showMenu)}
+            className="p-2.5 md:p-2 bg-[#222222] hover:bg-[#303030] rounded-full text-white transition-colors"
+          >
+            <MoreHorizontal className="w-5 h-5" />
+          </button>
+
+          {showMenu && (
+            <div className="absolute right-0 top-full mt-2 w-56 bg-[#1a1a1a] border border-[#303030] rounded-xl overflow-hidden shadow-2xl z-20">
+              <button
+                onClick={() => { setShowPlaylistModal(true); setShowMenu(false); }}
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#272727] text-white text-sm transition-colors"
+              >
+                <PlusCircle className="w-4 h-4" /> Save to playlist
+              </button>
+              
+              {isAuthor && (
+                <>
+                  <div className="border-t border-[#303030]"></div>
+                  <button
+                    onClick={() => { setEditing(true); setShowMenu(false); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#272727] text-white text-sm transition-colors"
+                  >
+                    <Pencil className="w-4 h-4" /> Edit video
+                  </button>
+                  <button
+                    onClick={() => { handleDelete(); setShowMenu(false); }}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#272727] text-red-400 text-sm transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" /> Delete video
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </div>
+
+      {showPlaylistModal && <PlaylistModal videoId={videoId} onClose={() => setShowPlaylistModal(false)} />}
 
       {/* Edit Modal */}
       {editing && (

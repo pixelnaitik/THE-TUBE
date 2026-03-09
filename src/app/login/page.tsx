@@ -52,14 +52,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0f0f0f] px-4">
-      <div className="max-w-md w-full bg-[#121212] border border-[#303030] p-8 rounded-2xl shadow-xl">
-        <div className="flex flex-col items-center mb-8">
-          <Link href="/" className="flex items-center gap-2 mb-6">
+    <div className="min-h-screen flex items-center justify-center bg-[#0f0f0f] px-4 py-12 md:py-0">
+      <div className="max-w-md w-full bg-[#121212] border border-[#303030] p-6 md:p-8 rounded-2xl shadow-xl">
+        <div className="flex flex-col items-center mb-6 md:mb-8">
+          <Link href="/" className="flex items-center gap-2 mb-4 md:mb-6">
             <div className="bg-red-600 text-white p-2 rounded-xl">
-              <Video className="w-8 h-8 fill-current" />
+              <Video className="w-6 h-6 md:w-8 md:h-8 fill-current" />
             </div>
-            <span className="text-3xl font-bold tracking-tighter text-white">MyTube</span>
+            <span className="text-2xl md:text-3xl font-bold tracking-tighter text-white">MyTube</span>
           </Link>
 
           {/* Tab Switcher */}

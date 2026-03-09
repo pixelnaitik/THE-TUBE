@@ -208,7 +208,7 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
   return (
     <div
       ref={containerRef}
-      className="relative w-full aspect-video bg-black rounded-xl overflow-hidden group"
+      className="relative w-full aspect-video max-w-full bg-black md:rounded-xl overflow-hidden group mx-auto"
       onMouseMove={showControlsTemporarily}
       onDoubleClick={handleDoubleTap}
     >
@@ -232,31 +232,31 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
         </div>
 
         {/* Bottom controls */}
-        <div className="flex items-center justify-between px-3 pb-2.5">
-          <div className="flex items-center gap-2">
-            <button onClick={togglePlay} className="p-1.5 hover:bg-white/10 rounded-full transition-colors">
-              {isPlaying ? <Pause className="w-5 h-5 text-white fill-current" /> : <Play className="w-5 h-5 text-white fill-current" />}
+        <div className="flex items-center justify-between px-2 md:px-3 pb-2.5">
+          <div className="flex items-center gap-1 md:gap-2">
+            <button onClick={togglePlay} className="p-2.5 hover:bg-white/10 rounded-full transition-colors">
+              {isPlaying ? <Pause className="w-6 h-6 md:w-5 md:h-5 text-white fill-current" /> : <Play className="w-6 h-6 md:w-5 md:h-5 text-white fill-current" />}
             </button>
 
             {/* Volume */}
             <div className="flex items-center gap-1 group/vol">
-              <button onClick={toggleMute} className="p-1.5 hover:bg-white/10 rounded-full transition-colors">
+              <button onClick={toggleMute} className="p-2.5 hover:bg-white/10 rounded-full transition-colors hidden sm:block">
                 {isMuted || volume === 0 ? <VolumeX className="w-5 h-5 text-white" /> : <Volume2 className="w-5 h-5 text-white" />}
               </button>
               <input
                 type="range" min={0} max={1} step={0.05} value={isMuted ? 0 : volume}
                 onChange={handleVolumeChange}
-                className="w-0 group-hover/vol:w-20 transition-all duration-200 h-1 appearance-none bg-white/30 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
+                className="w-0 group-hover/vol:w-20 overflow-hidden transition-all duration-200 h-1 appearance-none bg-white/30 rounded-full cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-0 [&::-webkit-slider-thumb]:h-0 group-hover/vol:[&::-webkit-slider-thumb]:w-3 group-hover/vol:[&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:transition-all"
               />
             </div>
 
-            <span className="text-white text-xs ml-1">{formatTime(currentTime)} / {formatTime(duration)}</span>
+            <span className="text-white text-xs ml-1 font-medium">{formatTime(currentTime)} / {formatTime(duration)}</span>
           </div>
 
-          <div className="flex items-center gap-1 relative">
+          <div className="flex items-center gap-0 md:gap-1 relative">
             {/* Settings button */}
-            <button onClick={() => setSettingsMenu(settingsMenu === 'none' ? 'main' : 'none')} className="p-1.5 hover:bg-white/10 rounded-full transition-colors">
-              <Settings className={`w-5 h-5 text-white transition-transform ${settingsMenu !== 'none' ? 'rotate-45' : ''}`} />
+            <button onClick={() => setSettingsMenu(settingsMenu === 'none' ? 'main' : 'none')} className="p-2.5 hover:bg-white/10 rounded-full transition-colors">
+              <Settings className={`w-6 h-6 md:w-5 md:h-5 text-white transition-transform ${settingsMenu !== 'none' ? 'rotate-45' : ''}`} />
             </button>
 
             {/* Settings Menu */}
@@ -330,8 +330,8 @@ export default function VideoPlayer({ src }: VideoPlayerProps) {
               </div>
             )}
 
-            <button onClick={toggleFullscreen} className="p-1.5 hover:bg-white/10 rounded-full transition-colors">
-              <Maximize className="w-5 h-5 text-white" />
+            <button onClick={toggleFullscreen} className="p-2.5 hover:bg-white/10 rounded-full transition-colors">
+              <Maximize className="w-6 h-6 md:w-5 md:h-5 text-white" />
             </button>
           </div>
         </div>

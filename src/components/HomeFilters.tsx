@@ -37,7 +37,7 @@ export default function HomeFilters({ currentSort, currentTag }: HomeFiltersProp
       </div>
 
       {/* Sort buttons */}
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {[
           { key: 'newest', label: 'Newest' },
           { key: 'views', label: 'Most Viewed' },
@@ -59,3 +59,5 @@ export default function HomeFilters({ currentSort, currentTag }: HomeFiltersProp
     </div>
   );
 }
+
+

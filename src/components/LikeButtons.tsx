@@ -57,14 +57,14 @@ export default function LikeButtons({ videoId }: LikeButtonsProps) {
     <div className="flex items-center bg-[#222222] rounded-full">
       <button
         onClick={() => handleReaction('LIKE')}
-        className={`flex items-center gap-2 px-4 py-2 rounded-l-full transition-colors border-r border-[#303030] ${userReaction === 'LIKE' ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-[#303030]'}`}
+        className={`flex items-center gap-2 px-4 py-2.5 md:py-2 rounded-l-full transition-colors border-r border-[#303030] ${userReaction === 'LIKE' ? 'bg-blue-500/20 text-blue-400' : 'hover:bg-[#303030]'}`}
       >
         <ThumbsUp className={`w-5 h-5 ${userReaction === 'LIKE' ? 'fill-current' : ''}`} />
         <span className="text-sm font-medium">{likes || ''}</span>
       </button>
       <button
         onClick={() => handleReaction('DISLIKE')}
-        className={`px-4 py-2 rounded-r-full transition-colors ${userReaction === 'DISLIKE' ? 'bg-red-500/20 text-red-400' : 'hover:bg-[#303030]'}`}
+        className={`px-4 py-2.5 md:py-2 rounded-r-full transition-colors ${userReaction === 'DISLIKE' ? 'bg-red-500/20 text-red-400' : 'hover:bg-[#303030]'}`}
       >
         <ThumbsUp className={`w-5 h-5 rotate-180 ${userReaction === 'DISLIKE' ? 'fill-current' : ''}`} />
       </button>
